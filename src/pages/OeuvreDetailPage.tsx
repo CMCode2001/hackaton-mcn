@@ -1,444 +1,481 @@
-// src/pages/OeuvreDetailPage.tsx
-import React, { useEffect, useState, useRef, Suspense } from "react";
-import { useParams, Link } from "react-router-dom";
-import { useTranslation } from "react-i18next";
+// OeuvreDetailPage.jsx
+import React, { useState, useRef, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, Volume2, Play, RotateCcw, X } from "lucide-react";
-import { Canvas } from "@react-three/fiber";
-import { OrbitControls, Environment, useGLTF, Html } from "@react-three/drei";
-import * as THREE from "three";
+import {
+  ArrowLeft,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Download,
+  Share2,
+  Heart,
+} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { SimpleViewer3D } from "@/components/Viewer3D";
 
-/**
- * Page de détail d'une œuvre
- * - Charge /data/artworks.json (place-le dans public/data/artworks.json)
- * - Affiche image + métadonnées à gauche
- * - Audio / Vidéo / Viewer 3D à droite
- */
-
-/* ---------- Types ---------- */
-type DescriptionMultilang = {
-  id: string;
-  langue: string; // 'fr' | 'en' | 'wo' ...
-  texteComplet: string;
-  audioUrl?: string;
-  videoUrl?: string;
-  historiqueEtContexte?: string;
+// Données des œuvres (à remplacer par votre API)
+const OEUVRE_DATA = {
+  "origines-africaines": {
+    id: "origines-africaines",
+    title: "Les Origines Africaines",
+    img: "/images/niveau1/galerie-homme-noir.jpg",
+    description:
+      "Berceau de l'humanité et diversité génétique des populations noires. L'Afrique est le continent où sont apparus les premiers humains il y a environ 300 000 ans. Les découvertes archéologiques et génétiques confirment que toutes les populations humaines modernes descendent d'ancêtres africains.",
+    category: "Anthropologie",
+    date: "Préhistoire - Antiquité",
+    localisation: "Afrique subsaharienne",
+    audio: "/audio/origines-africaines.mp3",
+    video: "/video/origines-africaines.mp4",
+    model3D: "/images/niveau1/3D/galerie-homme-noir.glb",
+    details: {
+      periode: "De 300 000 ans avant notre ère à aujourd'hui",
+      materiaux: "Documentation scientifique, artefacts archéologiques",
+      dimensions: "Multiple",
+      collection: "Anthropologie et Génétique",
+    },
+  },
+  "mali-empire": {
+    id: "mali-empire",
+    title: "Empire du Mali",
+    img: "/images/niveau2/galerie-empires.jpg",
+    description:
+      "L'âge d'or de l'Afrique de l'Ouest sous Mansa Moussa et l'apogée du commerce transsaharien. Fondé au XIIIe siècle, l'Empire du Mali fut l'un des plus vastes et riches empires de l'histoire africaine, célèbre pour ses villes universitaires comme Tombouctou et sa richesse légendaire.",
+    category: "Histoire",
+    date: "1235 - 1670",
+    localisation: "Afrique de l'Ouest",
+    audio: "/audio/mali-empire.mp3",
+    video: "/video/mali-empire.mp4",
+    model3D: "/models/mali-empire.glb",
+    details: {
+      periode: "XIIIe - XVIIe siècle",
+      materiaux: "Or, textiles, manuscrits",
+      dimensions: "Empire couvrant 1 million de km²",
+      collection: "Histoire des Empires Africains",
+    },
+  },
+  "memoire-traite": {
+    id: "memoire-traite",
+    title: "Mémoire de la Traite",
+    img: "/images/niveau3/galerie-traite.jpeg",
+    description:
+      "Histoire et mémoire des traites négrières et leurs impacts durables sur les sociétés africaines et la diaspora. Cette œuvre retrace le parcours douloureux de millions d'Africains déportés et leur résilience face à l'oppression.",
+    category: "Histoire",
+    date: "XVe - XIXe siècle",
+    localisation: "Afrique, Amériques, Caraïbes",
+    audio: "/audio/memoire-traite.mp3",
+    video: "/video/memoire-traite.mp4",
+    model3D: "/models/memoire-traite.glb",
+    details: {
+      periode: "1441 - 1888",
+      materiaux: "Archives, témoignages, artefacts",
+      dimensions: "Installation multimédia",
+      collection: "Mémoire et Histoire",
+    },
+  },
 };
 
-type Oeuvre = {
-  id: number;
-  qrCodeRef?: string;
-  titre: string;
-  auteur?: string;
-  dateCreation?: string;
-  localisationMusee?: string;
-  imageUrl?: string;
-  modele3dUrl?: string;
-  descriptions: DescriptionMultilang[];
-};
+export default function OeuvreDetailPage() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [activeTab, setActiveTab] = useState("audio");
+  const [isLiked, setIsLiked] = useState(false);
 
-/* ---------- 3D Model viewer (GLTF) ---------- */
-function ModelViewer({ url }: { url?: string | null }) {
-  if (!url) {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-sm text-[#C6B897]">
-        Aucun modèle 3D disponible
-      </div>
-    );
-  }
+  const audioRef = useRef(null);
+  const videoRef = useRef(null);
+  const progressRef = useRef(null);
 
-  // useGLTF may throw if model invalid — keep in Suspense with fallback
-  try {
-    return <GLTFScene url={url} />;
-  } catch (e) {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-sm text-[#C6B897]">
-        Impossible de charger le modèle 3D.
-      </div>
-    );
-  }
-}
-
-function GLTFScene({ url }: { url: string }) {
-  // useGLTF will cache; wrap in Suspense where used
-  const { scene } = useGLTF(url as string, true) as any;
-  // center & scale
-  const root = React.useRef<THREE.Group | null>(null);
-
-  // compute bounding box and scale to fit (simple approach)
-  useEffect(() => {
-    if (!scene || !root.current) return;
-    const box = new THREE.Box3().setFromObject(scene);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const max = Math.max(size.x, size.y, size.z);
-    let scale = 1;
-    if (max > 0) scale = 2.2 / max; // fit into view
-    root.current.scale.setScalar(scale);
-    // center
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    root.current.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
-  }, [scene]);
-
-  return (
-    <>
-      <group ref={root}>
-        <primitive object={scene} />
-      </group>
-
-      <ambientLight intensity={0.9} />
-      <directionalLight position={[5, 8, 5]} intensity={0.8} />
-      <Environment preset="studio" />
-      <OrbitControls enablePan={false} enableZoom={true} />
-    </>
-  );
-}
-
-/* ---------- Main Page Component ---------- */
-export default function OeuvreDetailPage(): JSX.Element {
-  const { id } = useParams<{ id?: string }>();
-  const { i18n, t } = useTranslation();
-  const lang = (i18n?.language || "fr").slice(0, 2);
-
-  const [oeuvre, setOeuvre] = useState<Oeuvre | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [modelError, setModelError] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const oeuvre = OEUVRE_DATA[id];
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    fetch("/data/artworks.json")
-      .then((r) => {
-        if (!r.ok) throw new Error("Impossible de charger artworks.json");
-        return r.json();
-      })
-      .then((data: Oeuvre[]) => {
-        if (!mounted) return;
-        const found =
-          (id && data.find((o) => String(o.id) === String(id))) || data[0] || null;
-        setOeuvre(found);
-      })
-      .catch((err) => {
-        console.error(err);
-        setOeuvre(null);
-      })
-      .finally(() => mounted && setLoading(false));
-    return () => {
-      mounted = false;
-    };
-  }, [id]);
+    if (!oeuvre) {
+      navigate("/oeuvres");
+      return;
+    }
+  }, [oeuvre, navigate]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0A0603] text-[#D4AF37]">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-[#D4AF37] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          Chargement de l'œuvre...
-        </div>
-      </div>
-    );
-  }
-
-  if (!oeuvre) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-[#0A0603] text-white p-6">
-        <h2 className="text-2xl font-semibold text-[#D4AF37] mb-4">
-          Œuvre introuvable
-        </h2>
-        <p className="text-[#C6B897] mb-6">
-          Impossible de charger les données de l'œuvre demandée.
-        </p>
-        <Link
-          to="/oeuvres"
-          className="px-6 py-3 bg-[#D4AF37] text-black rounded-lg font-semibold"
-        >
-          Retour aux œuvres
-        </Link>
-      </div>
-    );
-  }
-
-  // pick language description (fallback to first)
-  const desc =
-    oeuvre.descriptions.find((d) => d.langue === lang) || oeuvre.descriptions[0];
-
-  const handlePlayAudio = async () => {
-    if (!desc?.audioUrl) return;
-    if (!audioRef.current) audioRef.current = new Audio(desc.audioUrl);
-    try {
-      await audioRef.current.play();
-    } catch (e) {
-      console.warn("Playback blocked", e);
+  // Gestion audio
+  const togglePlayPause = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     }
   };
 
-  const handlePauseAudio = () => {
-    if (audioRef.current) audioRef.current.pause();
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
   };
 
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+      setDuration(audioRef.current.duration || 0);
+    }
+  };
+
+  const handleProgressClick = (e) => {
+    if (audioRef.current && progressRef.current) {
+      const rect = progressRef.current.getBoundingClientRect();
+      const percent = (e.clientX - rect.left) / rect.width;
+      audioRef.current.currentTime = percent * duration;
+    }
+  };
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  if (!oeuvre) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-[#070403] text-white">
-      {/* Top controls */}
-      <div className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            to="/oeuvres"
-            className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-black/40 hover:bg-black/30 border border-[#D4AF37]/15 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4 text-[#D4AF37]" />
-            <span className="text-[#D4AF37] font-medium">Retour</span>
-          </Link>
-          <div className="text-sm text-[#C6B897]">
-            <span className="font-semibold text-[#D4AF37] mr-2">{oeuvre.titre}</span>
-            — {oeuvre.auteur || ""}
+    <div className="min-h-screen bg-gradient-to-br from-[#0A0603] to-[#1a120b] text-white">
+      {/* Header */}
+      <header className="border-b border-[#D4AF37]/20 bg-black/40 backdrop-blur-lg">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate("/oeuvres")}
+              className="flex items-center gap-3 text-[#D4AF37] hover:text-white transition-colors group"
+            >
+              <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-semibold">Retour au Musée</span>
+            </button>
+
+            <div className="flex items-center gap-4">
+              <button
+                onClick={() => setIsLiked(!isLiked)}
+                className={`p-2 rounded-full transition-all ${
+                  isLiked
+                    ? "bg-red-500/20 text-red-400"
+                    : "bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37]/20"
+                }`}
+              >
+                <Heart
+                  className="w-5 h-5"
+                  fill={isLiked ? "currentColor" : "none"}
+                />
+              </button>
+
+              <button className="p-2 bg-[#D4AF37]/10 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition-colors">
+                <Share2 className="w-5 h-5" />
+              </button>
+
+              <button className="p-2 bg-[#D4AF37]/10 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition-colors">
+                <Download className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
+      </header>
 
-        <div className="text-xs text-[#C6B897]">MCN-Digit — Détails œuvre</div>
-      </div>
-
-      {/* Main layout */}
-      <div className="max-w-7xl mx-auto px-6 pb-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left: Image + basic info */}
-        <motion.section
-          initial={{ x: -20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.45 }}
-          className="space-y-6"
-        >
-          <div className="rounded-2xl overflow-hidden border border-[#D4AF37]/20 shadow-xl bg-gradient-to-b from-black/30 to-black/10">
-            <img
-              src={oeuvre.imageUrl}
-              alt={oeuvre.titre}
-              className="w-full h-[560px] object-cover"
-            />
-            <div className="p-5 bg-gradient-to-t from-black/40">
-              <h1 className="text-3xl font-bold text-[#D4AF37]">{oeuvre.titre}</h1>
-              <p className="text-[#C6B897] mt-2">{desc?.texteComplet}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-black/40 rounded-xl p-4 border border-[#D4AF37]/10">
-              <h4 className="text-[#D4AF37] font-semibold">Auteur</h4>
-              <p className="text-[#C6B897] mt-1">{oeuvre.auteur}</p>
-            </div>
-            <div className="bg-black/40 rounded-xl p-4 border border-[#D4AF37]/10">
-              <h4 className="text-[#D4AF37] font-semibold">Date</h4>
-              <p className="text-[#C6B897] mt-1">{oeuvre.dateCreation}</p>
-            </div>
-            <div className="bg-black/40 rounded-xl p-4 border border-[#D4AF37]/10">
-              <h4 className="text-[#D4AF37] font-semibold">Localisation</h4>
-              <p className="text-[#C6B897] mt-1">{oeuvre.localisationMusee}</p>
-            </div>
-            <div className="bg-black/40 rounded-xl p-4 border border-[#D4AF37]/10">
-              <h4 className="text-[#D4AF37] font-semibold">QR</h4>
-              <p className="text-[#C6B897] mt-1">{oeuvre.qrCodeRef || "—"}</p>
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Right: audio / video / 3d */}
-        <motion.aside
-          initial={{ x: 20, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ duration: 0.45 }}
-          className="space-y-6"
-        >
-          {/* Audio player */}
-          <div className="bg-black/40 rounded-2xl p-5 border border-[#D4AF37]/10">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Volume2 className="w-6 h-6 text-[#D4AF37]" />
-                <div>
-                  <div className="text-sm font-semibold text-[#D4AF37]">Audio Guide</div>
-                  <div className="text-xs text-[#C6B897]">Écoute l'histoire de l'œuvre</div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handlePlayAudio}
-                  className="px-3 py-2 bg-[#D4AF37] text-black rounded-lg font-medium"
-                >
-                  Écouter
-                </button>
-                <button
-                  onClick={handlePauseAudio}
-                  className="px-3 py-2 border border-[#D4AF37]/20 rounded-lg text-[#C6B897]"
-                >
-                  Pause
-                </button>
-              </div>
-            </div>
-
-            {/* native audio element for accessibility (kept hidden) */}
-            {desc?.audioUrl && (
-              <audio
-                src={desc.audioUrl}
-                ref={audioRef}
-                controls
-                className="w-full mt-4"
+      {/* Contenu principal */}
+      <main className="container mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Colonne de gauche - Image et informations de base */}
+          <div className="space-y-8">
+            {/* Image principale */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="relative bg-[#1a120b] rounded-2xl overflow-hidden border-2 border-[#D4AF37]/30"
+            >
+              <img
+                src={oeuvre.img}
+                alt={oeuvre.title}
+                className="w-full h-96 object-cover"
+                onError={(e) => {
+                  e.target.src =
+                    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400' viewBox='0 0 400 400'%3E%3Crect width='400' height='400' fill='%232d1b0e'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='24' fill='%23D4AF37'%3E🖼️ Œuvre%3C/text%3E%3C/svg%3E";
+                }}
               />
-            )}
-            {!desc?.audioUrl && (
-              <div className="mt-4 text-xs text-[#C6B897]">Aucun audio disponible</div>
-            )}
-          </div>
 
-          {/* Video player */}
-          <div className="bg-black/40 rounded-2xl p-5 border border-[#D4AF37]/10">
-            <div className="flex items-center gap-3 mb-4">
-              <Play className="w-5 h-5 text-[#D4AF37]" />
-              <h3 className="text-[#D4AF37] font-semibold">Vidéo de présentation</h3>
-            </div>
+              <button className="absolute top-4 right-4 p-2 bg-black/60 rounded-lg text-white hover:bg-black/80 transition-colors">
+                <Maximize className="w-5 h-5" />
+              </button>
+            </motion.div>
 
-            {desc?.videoUrl ? (
-              <div className="aspect-video rounded-lg overflow-hidden border border-[#D4AF37]/10">
-                {/* Use native <video> if remote mp4, otherwise iframe for youtube */}
-                {desc.videoUrl.includes("youtube") || desc.videoUrl.includes("youtu.be") ? (
-                  <iframe
-                    src={desc.videoUrl}
-                    title={`${oeuvre.titre} - vidéo`}
-                    className="w-full h-full"
-                    allowFullScreen
-                  />
-                ) : (
-                  <video
-                    src={desc.videoUrl}
-                    controls
-                    className="w-full h-full object-cover bg-black"
-                  />
-                )}
-              </div>
-            ) : (
-              <div className="h-48 flex items-center justify-center text-[#C6B897]">
-                Aucune vidéo disponible
-              </div>
-            )}
-          </div>
+            {/* Informations détaillées */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-[#D4AF37]/20"
+            >
+              <h3 className="text-[#D4AF37] font-bold text-xl mb-4">
+                Informations détaillées
+              </h3>
 
-          {/* 3D Viewer */}
-          <div className="bg-black/40 rounded-2xl p-5 border border-[#D4AF37]/10">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-3">
-                <RotateCcw className="w-5 h-5 text-[#D4AF37]" />
-                <h3 className="text-[#D4AF37] font-semibold">Visualisation 3D</h3>
-              </div>
-              <div className="text-xs text-[#C6B897]">Interragis — zoom | rotation</div>
-            </div>
-
-            <div className="w-full h-[360px] rounded-lg overflow-hidden border border-[#D4AF37]/10 bg-black">
-              <Suspense
-                fallback={
-                  <div className="w-full h-full flex items-center justify-center text-[#C6B897]">
-                    Chargement 3D…
-                  </div>
-                }
-              >
-                {oeuvre.modele3dUrl ? (
-                  <Canvas camera={{ position: [2.3, 1.6, 2.3], fov: 45 }}>
-                    <ambientLight intensity={0.9} />
-                    <directionalLight position={[5, 10, 5]} intensity={1} />
-                    <Model3DWrapped url={oeuvre.modele3dUrl} onError={() => setModelError(true)} />
-                  </Canvas>
-                ) : (
-                  // fallback: textured box using artwork image
-                  <Canvas camera={{ position: [2.3, 1.6, 2.3], fov: 45 }}>
-                    <ambientLight intensity={0.9} />
-                    <directionalLight position={[5, 10, 5]} intensity={1} />
-                    <TexturedBox imageUrl={oeuvre.imageUrl} />
-                  </Canvas>
-                )}
-              </Suspense>
-
-              {modelError && (
-                <div className="absolute right-6 top-6 bg-red-600/80 text-white px-3 py-1 rounded text-xs">
-                  Erreur chargement 3D
+              <div className="space-y-3">
+                <div className="flex justify-between py-2 border-b border-[#D4AF37]/10">
+                  <span className="text-[#C6B897]">Catégorie</span>
+                  <span className="text-white font-medium">
+                    {oeuvre.category}
+                  </span>
                 </div>
-              )}
-            </div>
+
+                <div className="flex justify-between py-2 border-b border-[#D4AF37]/10">
+                  <span className="text-[#C6B897]">Période</span>
+                  <span className="text-white font-medium">
+                    {oeuvre.details.periode}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-2 border-b border-[#D4AF37]/10">
+                  <span className="text-[#C6B897]">Localisation</span>
+                  <span className="text-white font-medium">
+                    {oeuvre.localisation}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-2 border-b border-[#D4AF37]/10">
+                  <span className="text-[#C6B897]">Matériaux</span>
+                  <span className="text-white font-medium">
+                    {oeuvre.details.materiaux}
+                  </span>
+                </div>
+
+                <div className="flex justify-between py-2">
+                  <span className="text-[#C6B897]">Collection</span>
+                  <span className="text-white font-medium">
+                    {oeuvre.details.collection}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </motion.aside>
-      </div>
+
+          {/* Colonne de droite - Contenu interactif */}
+          <div className="space-y-8">
+            {/* En-tête de l'œuvre */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-4"
+            >
+              <div className="flex items-center gap-3">
+                <span className="bg-[#D4AF37]/20 text-[#D4AF37] rounded-full px-3 py-1 text-sm font-medium">
+                  {oeuvre.category}
+                </span>
+                <span className="text-[#C6B897] text-sm">{oeuvre.date}</span>
+              </div>
+
+              <h1 className="text-4xl lg:text-5xl font-bold text-[#D4AF37] leading-tight">
+                {oeuvre.title}
+              </h1>
+
+              <p className="text-[#C6B897] text-lg leading-relaxed">
+                {oeuvre.description}
+              </p>
+            </motion.div>
+
+            {/* Navigation des médias */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="bg-black/40 backdrop-blur-lg rounded-2xl overflow-hidden border border-[#D4AF37]/20"
+            >
+              {/* Tabs */}
+              <div className="flex border-b border-[#D4AF37]/20">
+                {[
+                  { id: "audio", label: "Audio", icon: "▶︎ •၊၊||၊|။|။" },
+                  { id: "video", label: "Documentaire Vidéo", icon: "🎥" },
+                  { id: "3d", label: "Version 3D", icon: "🧊" },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 py-4 text-center font-medium transition-all ${
+                      activeTab === tab.id
+                        ? "bg-[#D4AF37]/20 text-[#D4AF37] border-b-2 border-[#D4AF37]"
+                        : "text-[#C6B897] hover:text-white hover:bg-[#D4AF37]/10"
+                    }`}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <span>{tab.icon}</span>
+                      <span className="hidden sm:inline">{tab.label}</span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Contenu des tabs */}
+              <div className="p-6">
+                {/* Tab Audio */}
+                {activeTab === "audio" && (
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h3 className="text-[#D4AF37] font-bold text-lg mb-2">
+                        Contexte Historique Audio
+                      </h3>
+                      <p className="text-[#C6B897] text-sm">
+                        Écoutez l'histoire complète de cette œuvre
+                      </p>
+                    </div>
+
+                    {/* Lecteur audio */}
+                    <div className="bg-[#1a120b] rounded-xl p-6 border border-[#D4AF37]/30">
+                      <audio
+                        ref={audioRef}
+                        onTimeUpdate={handleTimeUpdate}
+                        onLoadedMetadata={handleTimeUpdate}
+                        onEnded={() => setIsPlaying(false)}
+                        className="hidden"
+                      >
+                        <source src={oeuvre.audio} type="audio/mpeg" />
+                        Votre navigateur ne supporte pas l'élément audio.
+                      </audio>
+
+                      {/* Contrôles audio */}
+                      <div className="space-y-4">
+                        {/* Barre de progression */}
+                        <div
+                          ref={progressRef}
+                          onClick={handleProgressClick}
+                          className="w-full bg-[#D4AF37]/20 rounded-full h-2 cursor-pointer"
+                        >
+                          <div
+                            className="bg-[#D4AF37] h-2 rounded-full transition-all"
+                            style={{
+                              width: `${(currentTime / duration) * 100}%`,
+                            }}
+                          />
+                        </div>
+
+                        {/* Contrôles */}
+                        <div className="flex items-center justify-between">
+                          <span className="text-[#C6B897] text-sm">
+                            {formatTime(currentTime)}
+                          </span>
+
+                          <div className="flex items-center gap-4">
+                            <button
+                              onClick={toggleMute}
+                              className="text-[#D4AF37] hover:text-white transition-colors"
+                            >
+                              {isMuted ? (
+                                <VolumeX className="w-5 h-5" />
+                              ) : (
+                                <Volume2 className="w-5 h-5" />
+                              )}
+                            </button>
+
+                            <button
+                              onClick={togglePlayPause}
+                              className="bg-[#D4AF37] text-black rounded-full p-3 hover:bg-[#E6C158] transition-colors"
+                            >
+                              {isPlaying ? (
+                                <Pause className="w-6 h-6" />
+                              ) : (
+                                <Play className="w-6 h-6" />
+                              )}
+                            </button>
+                          </div>
+
+                          <span className="text-[#C6B897] text-sm">
+                            {formatTime(duration)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Transcription (optionnelle) */}
+                    <div className="bg-[#1a120b] rounded-xl p-6 border border-[#D4AF37]/30">
+                      <h4 className="text-[#D4AF37] font-bold mb-3">
+                        Transcription
+                      </h4>
+                      <p className="text-[#C6B897] text-sm leading-relaxed">
+                        {oeuvre.description} Cette œuvre représente un chapitre
+                        important de l'histoire des civilisations noires...
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab Vidéo */}
+                {activeTab === "video" && (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <h3 className="text-[#D4AF37] font-bold text-lg mb-2">
+                        Documentaire Vidéo
+                      </h3>
+                      <p className="text-[#C6B897] text-sm">
+                        Découvrez l'histoire visuelle de cette œuvre
+                      </p>
+                    </div>
+
+                    <div className="bg-[#1a120b] rounded-xl overflow-hidden border border-[#D4AF37]/30">
+                      <video
+                        ref={videoRef}
+                        className="w-full h-64 object-cover"
+                        controls
+                        poster={oeuvre.img}
+                      >
+                        <source src={oeuvre.video} type="video/mp4" />
+                        Votre navigateur ne supporte pas l'élément vidéo.
+                      </video>
+                    </div>
+
+                    
+                  </div>
+                )}
+
+                {/* Tab 3D */}
+                {activeTab === '3d' && (
+                    <div className="space-y-6">
+                      <div className="text-center">
+                        <h3 className="text-[#D4AF37] font-bold text-lg mb-2">
+                          Exploration 3D Interactive
+                        </h3>
+                        <p className="text-[#C6B897] text-sm">
+                          Tournez, zoomez et explorez cette œuvre sous tous les angles
+                        </p>
+                      </div>
+
+                      {/* Utilisez Viewer3D ou SimpleViewer3D selon ce qui fonctionne */}
+                      <SimpleViewer3D 
+                        modelUrl={oeuvre.model3D}
+                        className="h-96 w-full"
+                      />
+
+                      {/* Message d'information */}
+                      <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <span className="text-[#D4AF37] text-lg">💡</span>
+                          <div>
+                            <h4 className="text-[#D4AF37] font-semibold mb-1">Information 3D</h4>
+                            <p className="text-[#C6B897] text-sm">
+                              Les modèles 3D sont chargés depuis des fichiers GLB optimisés. 
+                              Si un modèle n'est pas disponible, un placeholder s'affichera.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
-
-/* ---------- helper components ---------- */
-
-// fallback textured box (when no gltf)
-function TexturedBox({ imageUrl }: { imageUrl?: string }) {
-  const tex = imageUrl || "";
-  return (
-    <>
-      <mesh scale={[1.6, 1.6, 1.6]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial>
-          {/* simple colored material; texture via <Html> fallback */}
-        </meshStandardMaterial>
-      </mesh>
-      <OrbitControls enablePan={false} enableZoom={true} />
-      <Environment preset="studio" />
-      <Html center>
-        <div className="w-[180px] bg-black/60 rounded p-2 text-xs text-[#C6B897]">Aperçu 3D</div>
-      </Html>
-    </>
-  );
-}
-
-// wrapper to load GLTF and catch runtime errors
-function Model3DWrapped({ url, onError }: { url: string; onError?: () => void }) {
-  try {
-    return <Model3DInner url={url} />;
-  } catch (e) {
-    console.error("Model3DWrapped error", e);
-    onError?.();
-    return (
-      <Html center>
-        <div className="text-red-400">Modèle 3D non chargé</div>
-      </Html>
-    );
-  }
-}
-
-function Model3DInner({ url }: { url: string }) {
-  // useGLTF returns { scene, materials, nodes } but typed as any
-  const gltf = useGLTF(url) as any;
-
-  // basic auto-scale & center
-  const groupRef = useRef<THREE.Group | null>(null);
-  useEffect(() => {
-    if (!gltf?.scene || !groupRef.current) return;
-    const box = new THREE.Box3().setFromObject(gltf.scene);
-    const size = new THREE.Vector3();
-    box.getSize(size);
-    const max = Math.max(size.x, size.y, size.z);
-    const scale = max > 0 ? 1.8 / max : 1;
-    groupRef.current.scale.setScalar(scale);
-    const center = new THREE.Vector3();
-    box.getCenter(center);
-    groupRef.current.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
-  }, [gltf]);
-
-  // gentle rotation
-  useFrame(() => {
-    if (groupRef.current) groupRef.current.rotation.y += 0.003;
-  });
-
-  return (
-    <>
-      <group ref={groupRef}>
-        <primitive object={gltf.scene} />
-      </group>
-      <ambientLight intensity={0.9} />
-      <directionalLight position={[4, 6, 3]} intensity={1} />
-      <Environment preset="studio" />
-      <OrbitControls enablePan={false} enableZoom={true} />
-    </>
-  );
-}
-
-
