@@ -1,0 +1,154 @@
+{
+  "nav": {
+    "home": "Kër",
+    "artworks": "Jëf",
+    "scan": "Tëg",
+    "about": "Ci la"
+  },
+  "language": {
+    "select": "Tànn làkk",
+    "fr": "Faraase",
+    "en": "Àngale",
+    "wo": "Wolof"
+  },
+  "landing": {
+    "subtitle": "Musée Digital bi ci Gëstu Xeltu yi",
+    "hero": {
+      "title": "Deege ci",
+      "subtitle": "Xeltu yi",
+      "description": "Gis yiwu Afrig ci biiram ngir xam-xam bu bees bi"
+    },
+    "cta": {
+      "explore": "Gis jëf yi",
+      "video": "Gis wetu",
+      "title": "Ngay xaar biiram?",
+      "description": "Tëg, xam te dugg ci taariixu xeltu yi",
+      "start": "Dëggal biiram"
+    },
+    "exhibits": {
+      "title": "Wone yi",
+      "subtitle": "Gis nu njëkk te dellu ci taariix",
+      "0": {
+        "title": "Nguur yi",
+        "description": "Xam nguur yu mag yi ñu gënal Afrig"
+      },
+      "1": {
+        "title": "Fann ak Xel",
+        "description": "Gis noonu xeltu yi di jëfe ak di xalaat"
+      },
+      "2": {
+        "title": "Xam-xamu Njëkk",
+        "description": "Gis lu ñu gënal Afrig fekkee"
+      }
+    },
+    "features": {
+      "title": "Biiram bu Wees",
+      "subtitle": "Xam-xam bu bees bi di dëkkal yiwu ak taariix",
+      "0": {
+        "title": "Dëggalu bu Yàgg",
+        "description": "Gis jëf yi nekk ci 3D te xam li waral leen"
+      },
+      "1": {
+        "title": "Tolluwaay bu Wàcc",
+        "description": "Tuur bi ngir xam lu la neex ci wone yi"
+      },
+      "2": {
+        "title": "Mbootaay",
+        "description": "Jàngale ak bokk ci li ñu gis"
+      }
+    },
+    "learnMore": "Xam ci",
+    "footer": {
+      "tagline": "Dëkkal te jaxase yiwu Afrig",
+      "rights": "Sañ sañ yépp a dëkk"
+    }
+  },
+  "oeuvres": {
+    "title": "Room Tour — Biiram bu Nit ñi",
+    "subtitle": "Gis jëf yi nekk ci kaw te nga dugg ci biiram bu mel ni mbàmbulaan",
+    "back": "Dellu ci kër",
+    "sound": {
+      "play": "Taxawal xibaaru biiram",
+      "pause": "Taxawal xibaar bi"
+    },
+    "loading": "Mi ngi yóbbu biiram bu yees...",
+    "artworks": {
+      "masque_dogon": {
+        "title": "Maske bu Dogon",
+        "description": "Maske bu Dogon bu Mali, ñuy jëfandikoo ci jumtukaay ak seede bu xel.",
+        "culture": "Dogon yi",
+        "period": "Xeet 19e - 20e",
+        "material": "Garab, laalo bu natural",
+        "location": "Mali, Afrig Sowwu"
+      },
+      "statuette_nok": {
+        "title": "Nok bu Njaxu",
+        "description": "Njàngu bu Nok, li mujj ci njàngu ak lëfandiku Afrig.",
+        "culture": "Nok yi",
+        "period": "500 av. JC - 200 ap. JC",
+        "material": "Tëf",
+        "location": "Nijeria, Afrig Sowwu"
+      },
+      "poterie_senoufo": {
+        "title": "Poterie bu Senoufo",
+        "description": "Poterie bu Senoufo yi, yu mel ak melo yu sedd ak lammiñu xel.",
+        "culture": "Senoufo yi",
+        "period": "Xeet 19e - 20e",
+        "material": "Njàgg, laalo",
+        "location": "Kotdiwaar, Mali, Burkina Faso"
+      },
+      "bronze_benin": {
+        "title": "Bronze bu Benin",
+        "description": "Jëf bu ñu def ci ndam bu Benin, day wone xam-xam bu réew mi ci tëgg.",
+        "culture": "Ndamu Benin",
+        "period": "Xeet 16e - 18e",
+        "material": "Bronze bu ñu def ci farlu",
+        "location": "Nijeria, Afrig Sowwu"
+      },
+      "pagne_ashanti": {
+        "title": "Lëkkool bu Ashanti",
+        "description": "Kente bu Ashanti, laabu ndam ak diggante bu ndaw yi.",
+        "culture": "Ashanti yi",
+        "period": "Xeet 17e - 20e",
+        "material": "Sëkk, koton",
+        "location": "Ganaa, Afrig Sowwu"
+      },
+      "statue_bamileke": {
+        "title": "Statue bu Bamileke",
+        "description": "Statue bu Bamileke, day wone ndam ak doole bu buur yi ak xel.",
+        "culture": "Bamileke yi",
+        "period": "Xeet 19e - 20e",
+        "material": "Garab, per, cowries",
+        "location": "Kamerun, Afrig Diggante"
+      }
+    },
+    "actions": {
+      "explore": "Gis jëf bi",
+      "details": "Wone benn benn",
+      "close": "Tëj",
+      "next": "Jëf bu topp",
+      "previous": "Jëf bu jiitu"
+    },
+    "categories": {
+      "all": "Jëf yépp",
+      "sculptures": "Ndépp yi",
+      "masks": "Maske yi",
+      "pottery": "Poterie yi",
+      "textiles": "Lëkkool yi",
+      "metals": "Xeer yi"
+    },
+    "info": {
+      "culture": "Xeltu",
+      "period": "Jamono",
+      "material": "Lëndëm",
+      "location": "Fukk ci Afrig",
+      "description": "Lemu jëf bi"
+    },
+    "navigation": {
+      "zoom": "Yéene / Wàññi",
+      "rotate": "Wër ci biiram",
+      "move": "Dolli walla yéene",
+      "reset": "Dellu ci ndax jàmm"
+    }
+  }
+}

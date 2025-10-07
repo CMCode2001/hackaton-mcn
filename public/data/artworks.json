@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "title": { "fr": "Masque Dogon", "en": "Dogon Mask" },
+    "description": {
+      "fr": "Masque cérémoniel du peuple Dogon",
+      "en": "Ceremonial mask from the Dogon people"
+    },
+    "img": "https://images.unsplash.com/photo-1605235896464-243a379cb83a?w=600&auto=format&fit=crop&q=60",
+    "audio": "/media/audio/dogon-mask.mp3",
+    "category": "Masque",
+    "room": "Salle 1",
+    "position": [4, 2, -6]
+  },
+  {
+    "id": "nok-statue",
+    "title": { "fr": "Statuette Nok", "en": "Nok Statue" },
+    "description": {
+      "fr": "Sculpture en terre cuite de la culture Nok",
+      "en": "Clay sculpture from the Nok culture"
+    },
+    "img": "https://images.unsplash.com/photo-1673251672498-237773856ace?w=600&auto=format&fit=crop&q=60",
+    "audio": "/media/audio/nok-statue.mp3",
+    "category": "Statuette",
+    "room": "Salle 1",
+    "position": [-5, 1, 2]
+  },
+  {
+    "id": "bambara-statue",
+    "title": { "fr": "Statue Bambara", "en": "Bambara Statue" },
+    "description": {
+      "fr": "Statue représentant un esprit protecteur",
+      "en": "Statue representing a protective spirit"
+    },
+    "img": "https://images.unsplash.com/photo-1612831819158-b2a15c9e8db1?w=600&auto=format&fit=crop&q=60",
+    "category": "Sculpture",
+    "room": "Salle 2",
+    "position": [2, 1.5, -3]
+  }
+]

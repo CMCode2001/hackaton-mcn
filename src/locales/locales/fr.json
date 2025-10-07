@@ -1,0 +1,154 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "artworks": "Œuvres",
+    "scan": "Scanner",
+    "about": "À propos"
+  },
+  "language": {
+    "select": "Choisir la langue",
+    "fr": "Français",
+    "en": "English",
+    "wo": "Wolof"
+  },
+  "landing": {
+    "subtitle": "Musée des Civilisations Noires Digital",
+    "hero": {
+      "title": "Voyagez à travers",
+      "subtitle": "les Civilisations Noires",
+      "description": "Découvrez l'héritage culturel africain à travers une expérience numérique immersive et interactive"
+    },
+    "cta": {
+      "explore": "Explorer les œuvres",
+      "video": "Voir la démo",
+      "title": "Prêt pour l'expérience ?",
+      "description": "Scannez, découvrez et plongez dans l'histoire des civilisations noires",
+      "start": "Commencer l'expérience"
+    },
+    "exhibits": {
+      "title": "Expositions Immersives",
+      "subtitle": "Parcourez nos collections numériques et revivez l'histoire",
+      "0": {
+        "title": "Royaumes Africains",
+        "description": "Découvrez les grands empires et royaumes qui ont marqué l'histoire de l'Afrique"
+      },
+      "1": {
+        "title": "Art et Spiritualité",
+        "description": "Explorez les traditions artistiques et spirituelles des civilisations noires"
+      },
+      "2": {
+        "title": "Innovations Ancestrales",
+        "description": "Les découvertes scientifiques et techniques des civilisations africaines"
+      }
+    },
+    "features": {
+      "title": "Une Expérience Unique",
+      "subtitle": "Technologie au service de la culture et de l'histoire",
+      "0": {
+        "title": "Réalité Augmentée",
+        "description": "Visualisez les artefacts en 3D et découvrez leur histoire de manière interactive"
+      },
+      "1": {
+        "title": "Visite Guidée",
+        "description": "Parcours personnalisés adaptés à vos centres d'intérêt"
+      },
+      "2": {
+        "title": "Communauté",
+        "description": "Partagez vos découvertes et échangez avec d'autres passionnés"
+      }
+    },
+    "learnMore": "En savoir plus",
+    "footer": {
+      "tagline": "Préservons et partageons notre héritage culturel",
+      "rights": "Tous droits réservés"
+    }
+  },
+  "oeuvres": {
+    "title": "La Salle Virtuelle — Room Tour",
+    "subtitle": "Contemplez les œuvres flottantes et plongez dans une traversée sensorielle",
+    "back": "Retour à l'accueil",
+    "sound": {
+      "play": "Activer le son ambiant",
+      "pause": "Désactiver le son ambiant"
+    },
+    "loading": "Chargement de l'expérience immersive...",
+    "artworks": {
+      "masque_dogon": {
+        "title": "Masque Dogon",
+        "description": "Masque cérémoniel du peuple Dogon du Mali, utilisé lors des rituels et cérémonies traditionnelles",
+        "culture": "Culture Dogon",
+        "period": "XIXe-XXe siècle",
+        "material": "Bois, pigments naturels",
+        "location": "Mali, Afrique de l'Ouest"
+      },
+      "statuette_nok": {
+        "title": "Statuette Nok",
+        "description": "Sculpture en terre cuite de la culture Nok, l'une des plus anciennes traditions artistiques d'Afrique",
+        "culture": "Culture Nok",
+        "period": "500 av. J.-C. - 200 ap. J.-C.",
+        "material": "Terre cuite",
+        "location": "Nigeria, Afrique de l'Ouest"
+      },
+      "poterie_senoufo": {
+        "title": "Poterie Sénoufo",
+        "description": "Poterie traditionnelle du peuple Sénoufo, caractérisée par ses formes élégantes et ses motifs symboliques",
+        "culture": "Peuple Sénoufo",
+        "period": "XIXe-XXe siècle",
+        "material": "Argile, pigments",
+        "location": "Côte d'Ivoire, Mali, Burkina Faso"
+      },
+      "bronze_benin": {
+        "title": "Bronze Bénin",
+        "description": "Sculpture en bronze du royaume du Bénin, témoignage de la maîtrise exceptionnelle de la métallurgie",
+        "culture": "Royaume du Bénin",
+        "period": "XVIe-XVIIIe siècle",
+        "material": "Bronze à la cire perdue",
+        "location": "Nigeria, Afrique de l'Ouest"
+      },
+      "pagne_ashanti": {
+        "title": "Pagne Ashanti",
+        "description": "Tissu Kente traditionnel des Ashanti, symbole de prestige et d'identité culturelle",
+        "culture": "Royaume Ashanti",
+        "period": "XVIIe-XXe siècle",
+        "material": "Soie, coton",
+        "location": "Ghana, Afrique de l'Ouest"
+      },
+      "statue_bamileke": {
+        "title": "Statue Bamileke",
+        "description": "Statue royale Bamileke représentant l'autorité et la puissance spirituelle des chefs traditionnels",
+        "culture": "Peuple Bamileke",
+        "period": "XIXe-XXe siècle",
+        "material": "Bois, perles, cauris",
+        "location": "Cameroun, Afrique Centrale"
+      }
+    },
+    "actions": {
+      "explore": "Explorer l'œuvre",
+      "details": "Voir les détails",
+      "close": "Fermer",
+      "next": "Œuvre suivante",
+      "previous": "Œuvre précédente"
+    },
+    "categories": {
+      "all": "Toutes les œuvres",
+      "sculptures": "Sculptures",
+      "masks": "Masques",
+      "pottery": "Poterie",
+      "textiles": "Textiles",
+      "metals": "Métaux"
+    },
+    "info": {
+      "culture": "Culture",
+      "period": "Période",
+      "material": "Matériau",
+      "location": "Origine géographique",
+      "description": "Description"
+    },
+    "navigation": {
+      "zoom": "Zoomer/Dézoomer",
+      "rotate": "Tourner la vue",
+      "move": "Se déplacer",
+      "reset": "Réinitialiser la vue"
+    }
+  }
+}

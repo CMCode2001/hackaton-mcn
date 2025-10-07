@@ -1,0 +1,110 @@
+[
+  {
+    "id": "1",
+    "qrCodeRef": "QR-AFR-001",
+    "titre": "Masque Dan",
+    "auteur": "Artisan du peuple Dan",
+    "dateCreation": "XIXe siècle",
+    "localisationMusee": "Salle des Masques, Afrique de l’Ouest",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/2/23/Dan_mask_Louvre.jpg",
+    "modele3dUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Avocado/glTF/Avocado.gltf",
+    "descriptions": [
+      {
+        "id": "desc-1-fr",
+        "langue": "fr",
+        "texteComplet": "Le masque Dan, originaire de Côte d’Ivoire et du Libéria, est un symbole spirituel utilisé lors des cérémonies initiatiques. Sculpté dans le bois et orné de fibres naturelles, il incarne les esprits protecteurs et sert de médiateur entre le monde visible et invisible.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "Les masques Dan sont utilisés pour éduquer, protéger et relier la communauté à ses ancêtres. Chaque masque a une personnalité distincte et peut représenter un esprit de la forêt ou un gardien des traditions."
+      },
+      {
+        "id": "desc-1-en",
+        "langue": "en",
+        "texteComplet": "The Dan mask, from Côte d’Ivoire and Liberia, is a spiritual symbol used in initiation ceremonies. Carved from wood and decorated with natural fibers, it embodies protective spirits and acts as a bridge between the visible and invisible worlds.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "Dan masks are used to educate, protect, and connect the community to its ancestors. Each mask has a unique personality, representing a forest spirit or guardian of traditions."
+      },
+      {
+        "id": "desc-1-wo",
+        "langue": "wo",
+        "texteComplet": "Masque Dan moo joge ci Côte d’Ivoire ak Libéria. Danuy jëfandikoo ko ci cérémonie yi ngir yërmandé ak wone ruu bu dénd bi ak ruu bu dul gisu. Jot na solo ci ñu Dan, mu ngi defar ci garab ak yamb ak fibre naturelle.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "Masque yi ngir Dan dañuy jëfandikoo ngir jàngal, yërmandé ak jokkoo ak ndey ak baay yi. Benn benn am na boppam ak xelam bu mu wone ci ruu yi."
+      }
+    ]
+  },
+  {
+    "id": "2",
+    "qrCodeRef": "QR-AFR-002",
+    "titre": "Trône du roi Béhanzin",
+    "auteur": "Artisans du royaume du Dahomey",
+    "dateCreation": "Fin du XIXe siècle",
+    "localisationMusee": "Salle des Royaumes, Bénin",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Trone_du_roi_Behanzin_Benin.jpg",
+    "modele3dUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Chair/glTF/Chair.gltf",
+    "descriptions": [
+      {
+        "id": "desc-2-fr",
+        "langue": "fr",
+        "texteComplet": "Ce trône, symbole de pouvoir et de royauté, appartenait au roi Béhanzin du Dahomey, connu pour sa résistance contre la colonisation française. Il est finement sculpté et décoré de motifs représentant la force et la sagesse.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "Le royaume du Dahomey (actuel Bénin) était l’un des plus puissants d’Afrique de l’Ouest. Béhanzin, dernier roi avant la conquête coloniale, symbolise la dignité et la résistance du peuple béninois."
+      },
+      {
+        "id": "desc-2-en",
+        "langue": "en",
+        "texteComplet": "This throne, a symbol of power and royalty, belonged to King Béhanzin of Dahomey, known for his resistance against French colonization. It is intricately carved and decorated with patterns representing strength and wisdom.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "The Kingdom of Dahomey (modern-day Benin) was one of West Africa's most powerful states. Béhanzin, the last king before colonial conquest, symbolizes the dignity and resistance of the Beninese people."
+      },
+      {
+        "id": "desc-2-wo",
+        "langue": "wo",
+        "texteComplet": "Trône bii mooy lu jël solo ci poder ak boroom réew. Mooy trône bu Béhanzin, buur bu Dahomey bi fekk na ak jàngoro bu France. Moo doon xëyna ak lëfë yi wone doole ak xam-xam.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "Royaume Dahomey bi doon ab réew bu mag ci Afrique de l’Ouest. Béhanzin doon buur bu mujj te doon simbole jàmm ak defar."
+      }
+    ]
+  },
+  {
+    "id": "3",
+    "qrCodeRef": "QR-AFR-003",
+    "titre": "Statue Nok",
+    "auteur": "Civilisation Nok",
+    "dateCreation": "500 av. J.-C.",
+    "localisationMusee": "Galerie des Civilisations Anciennes, Nigéria",
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/0/0c/Nok_terracotta_figure_500BC.jpg",
+    "modele3dUrl": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Suzanne/glTF/Suzanne.gltf",
+    "descriptions": [
+      {
+        "id": "desc-3-fr",
+        "langue": "fr",
+        "texteComplet": "Les sculptures Nok, réalisées en terre cuite, sont parmi les plus anciennes d’Afrique subsaharienne. Elles témoignent d’une civilisation raffinée du Nigeria ancien, connue pour ses représentations expressives de visages humains.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "Découvertes dans le centre du Nigeria, les statues Nok sont datées d’environ 2500 ans. Elles révèlent l’importance de la spiritualité et de la représentation humaine dans l’art africain ancien."
+      },
+      {
+        "id": "desc-3-en",
+        "langue": "en",
+        "texteComplet": "The Nok sculptures, made of terracotta, are among the oldest in sub-Saharan Africa. They reflect an ancient Nigerian civilization renowned for its expressive human figures.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "Discovered in central Nigeria, the Nok statues date back around 2,500 years. They highlight the role of spirituality and human representation in ancient African art."
+      },
+      {
+        "id": "desc-3-wo",
+        "langue": "wo",
+        "texteComplet": "Sculpture yi Nok dañuy def ci terre cuite te mooy ab art bu gën nékk ci Afrique bu sub-saharienne. Ñuy wone nit ak xel bu mat.",
+        "audioUrl": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        "videoUrl": "https://www.w3schools.com/html/mov_bbb.mp4",
+        "historiqueEtContexte": "Ci diggante Nigeria lañu gisee yëf yi, dañuy jox xibaar bu mag ci xel ak jëm ci ndéyam ak nit ku defar art ci jamono ji."
+      }
+    ]
+  }
+]

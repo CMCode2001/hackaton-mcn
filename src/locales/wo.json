@@ -1,0 +1,79 @@
+{
+  "app": {
+    "title": "Musée bu Dëkk",
+    "tagline": "Gis ata ak sa telefon"
+  },
+  "nav": {
+    "home": "Kër",
+    "artworks": "Yëf yi",
+    "about": "Ci",
+    "scan": "Scan"
+  },
+  "home": {
+    "hero": "Dalal ak Musée bu Dëkk",
+    "description": "Scan-al QR code yi ngir gis yëf yi ak dëkëndoo bu mag, wideo ak modèl 3D.",
+    "scanCta": "Scan-al ab yëf",
+    "featuredTitle": "Yëf yu mag",
+    "exploreAll": "Gis yëp yëf yi"
+  },
+  "scanner": {
+    "title": "Scan QR Code",
+    "instructions": "Topp sa kamera ci QR code bi ci yëf bi",
+    "permissionDenied": "Kamera réy nañu ko. Jàppale ci paramètres yi.",
+    "error": "Njumte ci kamera bi",
+    "manualEntry": "Bind ci loxo",
+    "enterCode": "Bind QR code bi",
+    "submit": "Jox",
+    "notFound": "Yëf bu am ci code bii amul"
+  },
+  "artwork": {
+    "details": "Détails yëf bi",
+    "author": "Ki xam",
+    "date": "Bés bu def",
+    "location": "Ci",
+    "description": "Ndaxte",
+    "history": "Tarixu ak njëlu",
+    "audio": "Dégg ndaxte bi",
+    "video": "Xool wideo bi",
+    "model3d": "Modèl 3D",
+    "loading": "Dañuy yeeb...",
+    "notFound": "Yëf bi gisul",
+    "backToList": "Dellu ci liste bi"
+  },
+  "audio": {
+    "play": "Tànn",
+    "pause": "Taxaw",
+    "stop": "Aare",
+    "volume": "Volume",
+    "loading": "Dañuy yeeb audio..."
+  },
+  "video": {
+    "unavailable": "Wideo amul"
+  },
+  "model3d": {
+    "loading": "Dañuy yeeb modèl 3D...",
+    "error": "Njumte ci yeeb modèl 3D",
+    "unavailable": "Modèl 3D amul",
+    "controls": "Jëfandikoo sa soru walla sa baaraam ngir dor modèl bi",
+    "webglError": "WebGL japalante ci sa aparey bi"
+  },
+  "language": {
+    "select": "Làkk",
+    "fr": "Français",
+    "en": "English",
+    "wo": "Wolof"
+  },
+  "offline": {
+    "title": "Mode offline",
+    "message": "Léegi amul connexion. Yeneen fonctionnalités man na amul."
+  },
+  "error": {
+    "generic": "Ab njumte am na",
+    "network": "Njumte réseau. Xool sa connexion.",
+    "retry": "Jéema"
+  },
+  "about": {
+    "title": "Ci",
+    "description": "Aplikasiyu PWA bu Musée bu Dëkk mu jàppale la gis yëf yi ak teknoloji bu dëkk."
+  }
+}

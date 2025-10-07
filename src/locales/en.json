@@ -1,0 +1,79 @@
+{
+  "app": {
+    "title": "Virtual Museum",
+    "tagline": "Discover art with your smartphone"
+  },
+  "nav": {
+    "home": "Home",
+    "artworks": "Artworks",
+    "about": "About",
+    "scan": "Scan"
+  },
+  "home": {
+    "hero": "Welcome to Virtual Museum",
+    "description": "Scan QR codes to discover our artworks in augmented reality with audio descriptions, videos and 3D models.",
+    "scanCta": "Scan an artwork",
+    "featuredTitle": "Featured artworks",
+    "exploreAll": "Explore all artworks"
+  },
+  "scanner": {
+    "title": "Scan QR Code",
+    "instructions": "Point your camera at the artwork's QR code",
+    "permissionDenied": "Camera access denied. Please allow access in settings.",
+    "error": "Error accessing camera",
+    "manualEntry": "Manual entry",
+    "enterCode": "Enter QR code",
+    "submit": "Submit",
+    "notFound": "No artwork found with this code"
+  },
+  "artwork": {
+    "details": "Artwork details",
+    "author": "Author",
+    "date": "Creation date",
+    "location": "Location",
+    "description": "Description",
+    "history": "History and context",
+    "audio": "Listen to description",
+    "video": "Watch video",
+    "model3d": "3D Model",
+    "loading": "Loading...",
+    "notFound": "Artwork not found",
+    "backToList": "Back to list"
+  },
+  "audio": {
+    "play": "Play",
+    "pause": "Pause",
+    "stop": "Stop",
+    "volume": "Volume",
+    "loading": "Loading audio..."
+  },
+  "video": {
+    "unavailable": "Video unavailable"
+  },
+  "model3d": {
+    "loading": "Loading 3D model...",
+    "error": "Error loading 3D model",
+    "unavailable": "3D model unavailable",
+    "controls": "Use your mouse or finger to rotate the model",
+    "webglError": "WebGL is not supported on your device"
+  },
+  "language": {
+    "select": "Language",
+    "fr": "Français",
+    "en": "English",
+    "wo": "Wolof"
+  },
+  "offline": {
+    "title": "Offline mode",
+    "message": "You are currently offline. Some features may be limited."
+  },
+  "error": {
+    "generic": "An error occurred",
+    "network": "Network error. Check your connection.",
+    "retry": "Retry"
+  },
+  "about": {
+    "title": "About",
+    "description": "Virtual Museum PWA application allowing you to discover artworks through augmented reality and immersive technologies."
+  }
+}

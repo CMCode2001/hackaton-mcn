@@ -1,0 +1,79 @@
+{
+  "app": {
+    "title": "Musée Virtuel",
+    "tagline": "Découvrez l'art avec votre smartphone"
+  },
+  "nav": {
+    "home": "Accueil",
+    "artworks": "Œuvres",
+    "about": "À propos",
+    "scan": "Scanner"
+  },
+  "home": {
+    "hero": "Bienvenue au Musée Virtuel",
+    "description": "Scannez les codes QR pour découvrir nos œuvres en réalité augmentée avec descriptions audio, vidéos et modèles 3D.",
+    "scanCta": "Scanner une œuvre",
+    "featuredTitle": "Œuvres en vedette",
+    "exploreAll": "Explorer toutes les œuvres"
+  },
+  "scanner": {
+    "title": "Scanner le code QR",
+    "instructions": "Pointez votre caméra vers le code QR de l'œuvre",
+    "permissionDenied": "Accès à la caméra refusé. Veuillez autoriser l'accès dans les paramètres.",
+    "error": "Erreur lors de l'accès à la caméra",
+    "manualEntry": "Saisie manuelle",
+    "enterCode": "Entrez le code QR",
+    "submit": "Valider",
+    "notFound": "Aucune œuvre trouvée avec ce code"
+  },
+  "artwork": {
+    "details": "Détails de l'œuvre",
+    "author": "Auteur",
+    "date": "Date de création",
+    "location": "Localisation",
+    "description": "Description",
+    "history": "Histoire et contexte",
+    "audio": "Écouter la description",
+    "video": "Voir la vidéo",
+    "model3d": "Modèle 3D",
+    "loading": "Chargement...",
+    "notFound": "Œuvre non trouvée",
+    "backToList": "Retour à la liste"
+  },
+  "audio": {
+    "play": "Lecture",
+    "pause": "Pause",
+    "stop": "Arrêter",
+    "volume": "Volume",
+    "loading": "Chargement audio..."
+  },
+  "video": {
+    "unavailable": "Vidéo non disponible"
+  },
+  "model3d": {
+    "loading": "Chargement du modèle 3D...",
+    "error": "Erreur de chargement du modèle 3D",
+    "unavailable": "Modèle 3D non disponible",
+    "controls": "Utilisez votre souris ou votre doigt pour faire pivoter le modèle",
+    "webglError": "WebGL n'est pas supporté sur votre appareil"
+  },
+  "language": {
+    "select": "Langue",
+    "fr": "Français",
+    "en": "English",
+    "wo": "Wolof"
+  },
+  "offline": {
+    "title": "Mode hors ligne",
+    "message": "Vous êtes actuellement hors ligne. Certaines fonctionnalités peuvent être limitées."
+  },
+  "error": {
+    "generic": "Une erreur s'est produite",
+    "network": "Erreur réseau. Vérifiez votre connexion.",
+    "retry": "Réessayer"
+  },
+  "about": {
+    "title": "À propos",
+    "description": "Application PWA du Musée Virtuel permettant de découvrir les œuvres d'art via la réalité augmentée et les technologies immersives."
+  }
+}

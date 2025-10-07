@@ -1,0 +1,154 @@
+{
+  "nav": {
+    "home": "Home",
+    "artworks": "Artworks",
+    "scan": "Scan",
+    "about": "About"
+  },
+  "language": {
+    "select": "Choose language",
+    "fr": "French",
+    "en": "English",
+    "wo": "Wolof"
+  },
+  "landing": {
+    "subtitle": "Black Civilizations Digital Museum",
+    "hero": {
+      "title": "Travel through",
+      "subtitle": "Black Civilizations",
+      "description": "Discover African cultural heritage through an immersive and interactive digital experience"
+    },
+    "cta": {
+      "explore": "Explore artworks",
+      "video": "Watch demo",
+      "title": "Ready for the experience?",
+      "description": "Scan, discover and dive into the history of black civilizations",
+      "start": "Start experience"
+    },
+    "exhibits": {
+      "title": "Immersive Exhibitions",
+      "subtitle": "Browse our digital collections and relive history",
+      "0": {
+        "title": "African Kingdoms",
+        "description": "Discover the great empires and kingdoms that marked African history"
+      },
+      "1": {
+        "title": "Art and Spirituality",
+        "description": "Explore the artistic and spiritual traditions of black civilizations"
+      },
+      "2": {
+        "title": "Ancestral Innovations",
+        "description": "Scientific and technical discoveries of African civilizations"
+      }
+    },
+    "features": {
+      "title": "A Unique Experience",
+      "subtitle": "Technology at the service of culture and history",
+      "0": {
+        "title": "Augmented Reality",
+        "description": "View artifacts in 3D and discover their history interactively"
+      },
+      "1": {
+        "title": "Guided Tour",
+        "description": "Personalized tours tailored to your interests"
+      },
+      "2": {
+        "title": "Community",
+        "description": "Share your discoveries and exchange with other enthusiasts"
+      }
+    },
+    "learnMore": "Learn more",
+    "footer": {
+      "tagline": "Preserving and sharing our cultural heritage",
+      "rights": "All rights reserved"
+    }
+  },
+  "oeuvres": {
+    "title": "Virtual Room — Room Tour",
+    "subtitle": "Contemplate the floating artworks and dive into a sensory journey",
+    "back": "Back to home",
+    "sound": {
+      "play": "Enable ambient sound",
+      "pause": "Disable ambient sound"
+    },
+    "loading": "Loading immersive experience...",
+    "artworks": {
+      "masque_dogon": {
+        "title": "Dogon Mask",
+        "description": "Ceremonial mask of the Dogon people from Mali, used in traditional rituals and ceremonies",
+        "culture": "Dogon Culture",
+        "period": "19th-20th century",
+        "material": "Wood, natural pigments",
+        "location": "Mali, West Africa"
+      },
+      "statuette_nok": {
+        "title": "Nok Statuette",
+        "description": "Terracotta sculpture from the Nok culture, one of Africa's oldest artistic traditions",
+        "culture": "Nok Culture",
+        "period": "500 BC - 200 AD",
+        "material": "Terracotta",
+        "location": "Nigeria, West Africa"
+      },
+      "poterie_senoufo": {
+        "title": "Senoufo Pottery",
+        "description": "Traditional pottery of the Senoufo people, characterized by elegant shapes and symbolic patterns",
+        "culture": "Senoufo People",
+        "period": "19th-20th century",
+        "material": "Clay, pigments",
+        "location": "Ivory Coast, Mali, Burkina Faso"
+      },
+      "bronze_benin": {
+        "title": "Benin Bronze",
+        "description": "Bronze sculpture from the Kingdom of Benin, testament to exceptional metallurgical mastery",
+        "culture": "Kingdom of Benin",
+        "period": "16th-18th century",
+        "material": "Lost-wax bronze",
+        "location": "Nigeria, West Africa"
+      },
+      "pagne_ashanti": {
+        "title": "Ashanti Cloth",
+        "description": "Traditional Kente cloth of the Ashanti, symbol of prestige and cultural identity",
+        "culture": "Ashanti Kingdom",
+        "period": "17th-20th century",
+        "material": "Silk, cotton",
+        "location": "Ghana, West Africa"
+      },
+      "statue_bamileke": {
+        "title": "Bamileke Statue",
+        "description": "Royal Bamileke statue representing the authority and spiritual power of traditional chiefs",
+        "culture": "Bamileke People",
+        "period": "19th-20th century",
+        "material": "Wood, beads, cowries",
+        "location": "Cameroon, Central Africa"
+      }
+    },
+    "actions": {
+      "explore": "Explore artwork",
+      "details": "View details",
+      "close": "Close",
+      "next": "Next artwork",
+      "previous": "Previous artwork"
+    },
+    "categories": {
+      "all": "All artworks",
+      "sculptures": "Sculptures",
+      "masks": "Masks",
+      "pottery": "Pottery",
+      "textiles": "Textiles",
+      "metals": "Metals"
+    },
+    "info": {
+      "culture": "Culture",
+      "period": "Period",
+      "material": "Material",
+      "location": "Geographical origin",
+      "description": "Description"
+    },
+    "navigation": {
+      "zoom": "Zoom in/out",
+      "rotate": "Rotate view",
+      "move": "Move around",
+      "reset": "Reset view"
+    }
+  }
+}
