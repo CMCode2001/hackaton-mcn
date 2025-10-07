@@ -10,54 +10,99 @@ interface QRCodeScannerProps {
 
 const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose }) => {
   const [permission, setPermission] = useState<"unknown" | "granted" | "denied">("unknown");
-  const [cameraFacingMode, setCameraFacingMode] = useState<"environment" | "user">("environment");
+  const [cameraFacingMode, setCameraFacingMode] = useState<"environment" | "user">("environment"); // Déjà sur caméra arrière
   const [flash, setFlash] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const scannerRef = useRef<any>(null);
+  const scannerRef = useRef<QrScanner>(null);
 
   const handleScan = (result: any) => {
     if (!result?.text || isProcessing) return;
+    
+    console.log("QR Code détecté:", result.text);
+    
     try {
-      const url = new URL(result.text);
-      if (url.hostname === "hackaton-mcn-pi.vercel.app" && url.pathname.startsWith("/oeuvres/")) {
-        const id = url.pathname.replace("/oeuvres/", "").replace(/^\/+|\/+$/g, "");
-        if (id) {
-          setIsProcessing(true);
-          setFlash(true);
-          setTimeout(() => {
-            onScanSuccess(id);
-          }, 1200);
+      let oeuvreId = "";
+
+      // Méthode robuste pour extraire l'ID depuis l'URL
+      if (result.text.includes("/oeuvres/")) {
+        // Extraction depuis une URL complète
+        const match = result.text.match(/\/oeuvres\/([^/?]+)/);
+        if (match && match[1]) {
+          oeuvreId = match[1];
         }
       } else {
-        console.warn("QR Code externe ou invalide :", result.text);
+        // Si c'est juste l'ID directement
+        oeuvreId = result.text.trim();
       }
-    } catch {
-      console.warn("QR Code invalide :", result.text);
+      
+      // Nettoyer l'ID (supprimer les slashes en début/fin)
+      oeuvreId = oeuvreId.replace(/^\/+|\/+$/g, '');
+      
+      if (oeuvreId) {
+        console.log("ID d'œuvre extrait:", oeuvreId);
+        setIsProcessing(true);
+        setFlash(true);
+        
+        setTimeout(() => {
+          onScanSuccess(oeuvreId);
+          setIsProcessing(false);
+          setTimeout(() => setFlash(false), 500);
+        }, 1200);
+      } else {
+        console.warn("Aucun ID d'œuvre valide trouvé:", result.text);
+      }
+    } catch (error) {
+      console.error("Erreur lors du traitement du QR code:", error);
     }
   };
 
   const handleError = (err: any) => {
     console.error("Erreur scanner :", err);
-    setPermission("denied");
-  };
-
-  const requestPermission = async () => {
-    try {
-      await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraFacingMode } });
-      setPermission("granted");
-    } catch {
+    if (err.name === "NotAllowedError") {
       setPermission("denied");
     }
   };
 
-  const switchCamera = async () => {
-    const newMode = cameraFacingMode === "environment" ? "user" : "environment";
-    setCameraFacingMode(newMode);
-    await requestPermission();
+  const requestPermission = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: cameraFacingMode,
+          // Option supplémentaire pour forcer la caméra arrière sur mobile
+          ...(cameraFacingMode === "environment" && {
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          })
+        } 
+      });
+      setPermission("granted");
+      // Arrêter le stream après vérification
+      stream.getTracks().forEach(track => track.stop());
+    } catch (err: any) {
+      console.error("Erreur permission caméra:", err);
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        setPermission("denied");
+      } else {
+        setPermission("denied");
+      }
+    }
   };
 
+  const switchCamera = () => {
+    const newMode = cameraFacingMode === "environment" ? "user" : "environment";
+    setCameraFacingMode(newMode);
+  };
+
+  // Charger directement avec la caméra arrière
   useEffect(() => {
     requestPermission();
+  }, [cameraFacingMode]);
+
+  useEffect(() => {
+    return () => {
+      setIsProcessing(false);
+      setFlash(false);
+    };
   }, []);
 
   return (
@@ -85,7 +130,9 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-[#D4AF37]">Scanner d'Œuvre</h2>
-                <p className="text-[#C6B897] text-sm">Scannez le QR code pour découvrir l'œuvre</p>
+                <p className="text-[#C6B897] text-sm">
+                  Caméra {cameraFacingMode === "environment" ? "arrière" : "avant"} active
+                </p>
               </div>
             </div>
 
@@ -93,7 +140,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
               <button
                 onClick={switchCamera}
                 className="p-2 text-[#D4AF37] hover:text-white hover:bg-[#D4AF37]/10 rounded-xl transition-all duration-300 border border-[#D4AF37]/30"
-                title={`Changer caméra`}
+                title={`Passer à la caméra ${cameraFacingMode === "environment" ? "avant" : "arrière"}`}
               >
                 <Camera className="w-5 h-5" />
               </button>
@@ -112,20 +159,52 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
             {permission === "granted" && (
               <QrScanner
                 ref={scannerRef}
-                delay={500}
+                delay={300}
                 onError={handleError}
                 onScan={handleScan}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                constraints={{
+                  facingMode: cameraFacingMode
+                }}
+                style={{ 
+                  width: "100%", 
+                  height: "100%", 
+                  objectFit: "cover" 
+                }}
               />
             )}
-            {permission === "unknown" && <p className="text-[#C6B897] text-center mt-4">Demande d'accès caméra...</p>}
-            {permission === "denied" && <p className="text-red-500 text-center mt-4">Accès caméra refusé</p>}
+            {permission === "unknown" && (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-[#C6B897] text-center">Demande d'accès caméra...</p>
+              </div>
+            )}
+            {permission === "denied" && (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <p className="text-red-500 mb-4">Accès caméra refusé</p>
+                  <button
+                    onClick={requestPermission}
+                    className="px-4 py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#E6C158] transition-colors"
+                  >
+                    Réautoriser l'accès
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-[#C6B897] text-sm">
+              Positionnez le QR code dans le cadre pour le scanner
+            </p>
+            <p className="text-[#D4AF37] text-xs mt-2">
+              Caméra {cameraFacingMode === "environment" ? "arrière" : "avant"} active
+            </p>
           </div>
 
           <AnimatePresence>
             {flash && (
               <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/40 to-[#E6C158]/40 flex items-center justify-center"
+                className="absolute inset-0 bg-gradient-to-br from-[#D4AF37]/40 to-[#E6C158]/40 flex items-center justify-center z-50"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -134,6 +213,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                   className="bg-black/80 rounded-2xl p-8 border-2 border-[#D4AF37] shadow-2xl text-center"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
                 >
                   <Sparkles className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
                   <p className="text-2xl font-bold text-[#D4AF37]">Œuvre trouvée !</p>
