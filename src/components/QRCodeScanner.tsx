@@ -76,8 +76,6 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
         } 
       });
       setPermission("granted");
-      // Arrêter le stream après vérification
-      stream.getTracks().forEach(track => track.stop());
     } catch (err: any) {
       console.error("Erreur permission caméra:", err);
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
@@ -96,7 +94,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
   // Charger directement avec la caméra arrière
   useEffect(() => {
     requestPermission();
-  }, [cameraFacingMode]);
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -163,7 +161,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                 onError={handleError}
                 onScan={handleScan}
                 constraints={{
-                  facingMode: cameraFacingMode
+                  video: { facingMode: cameraFacingMode }
                 }}
                 style={{ 
                   width: "100%", 
