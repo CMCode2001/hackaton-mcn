@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Header } from './components/Header';
-import { ScanPage } from './pages/ScanPage';
 import { LandingPage } from './pages/LandingPage';
 import { OeuvresPage } from './pages/OeuvresPage';
 import OeuvreDetailPage from './pages/OeuvreDetailPage';
+import ScanPage from './pages/ScanPage';
 // import { SmoothCursor } from './components/ui/smooth-cursor';
 
 function App() {
