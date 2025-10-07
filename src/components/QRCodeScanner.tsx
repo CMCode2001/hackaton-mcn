@@ -1,16 +1,15 @@
-// components/QRCodeScanner.tsx
 import React, { useEffect, useRef, useState } from "react";
-import { QrReader } from "react-qr-reader";
+import QrScanner from "react-qr-scanner";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  X, 
-  ScanLine, 
-  QrCode, 
-  Loader2, 
+import {
+  X,
+  ScanLine,
+  QrCode,
+  Loader2,
   CameraOff,
   Zap,
   Sparkles,
-  Building
+  Building,
 } from "lucide-react";
 
 interface QRCodeScannerProps {
@@ -18,49 +17,52 @@ interface QRCodeScannerProps {
   onClose?: () => void;
 }
 
-const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose }) => {
+const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
+  onScanSuccess,
+  onClose,
+}) => {
   const [scanning, setScanning] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [flash, setFlash] = useState(false);
-  const [permission, setPermission] = useState<"unknown" | "granted" | "denied">("unknown");
+  const [permission, setPermission] = useState<
+    "unknown" | "granted" | "denied"
+  >("unknown");
   const [lastScanned, setLastScanned] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
 
   const handleScan = (result: any) => {
+    if (!result?.text && typeof result === "string") result = { text: result };
     if (result?.text && result.text !== lastScanned && !isProcessing) {
       const scannedData = result.text;
       setLastScanned(scannedData);
       setIsProcessing(true);
       setScanning(false);
       setFlash(true);
-      
-      // Animation de succès avant redirection
+
       setTimeout(() => {
         onScanSuccess(scannedData);
-        // Ne pas fermer automatiquement, laisser l'utilisateur voir le succès
       }, 1200);
     }
   };
 
   const handleError = (err: any) => {
     console.error("QR Scanner Error:", err);
-    const errorMsg = 
+    const errorMsg =
       err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError"
         ? "Accès à la caméra refusé. Autorisez l'accès pour scanner les QR codes des œuvres."
-        : err?.message?.includes("NotFoundError") || err?.name === "NotFoundError"
+        : err?.message?.includes("NotFoundError") ||
+          err?.name === "NotFoundError"
         ? "Aucune caméra arrière trouvée. Utilisez un appareil avec caméra."
         : "Erreur d'accès à la caméra. Vérifiez les permissions et réessayez.";
-    
+
     setError(errorMsg);
     setPermission("denied");
   };
 
   const stopStream = () => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => {
-        track.stop();
-      });
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
   };
@@ -73,20 +75,11 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
     }
 
     try {
-      setError(null);
-      setPermission("unknown");
-      
       const stream = await navigator.mediaDevices.getUserMedia({
-        video: { 
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
+        video: { facingMode: "environment" },
       });
-      
       streamRef.current = stream;
       setPermission("granted");
-      // Le QrReader ouvrira son propre stream, donc on arrête celui-ci
       stopStream();
     } catch (err: any) {
       handleError(err);
@@ -104,9 +97,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
 
   const handleManualClose = () => {
     stopStream();
-    if (onClose) {
-      onClose();
-    }
+    if (onClose) onClose();
   };
 
   useEffect(() => {
@@ -122,7 +113,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        {/* Fenêtre principale avec design premium */}
+        {/* Fenêtre principale */}
         <motion.div
           className="relative bg-gradient-to-br from-[#0A0603] to-[#1a120b] border-2 border-[#D4AF37]/40 rounded-3xl p-8 w-full max-w-2xl shadow-2xl shadow-[#D4AF37]/20 overflow-hidden"
           initial={{ scale: 0.8, opacity: 0, y: 20 }}
@@ -130,11 +121,11 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
           exit={{ scale: 0.8, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25 }}
         >
-          {/* Effet de brillance décoratif */}
+          {/* Effet doré */}
           <div className="absolute top-0 left-0 w-32 h-32 bg-[#D4AF37]/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
 
-          {/* En-tête */}
+          {/* Header */}
           <div className="relative z-10 flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
               <motion.div
@@ -146,7 +137,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                 <QrCode className="w-8 h-8 text-black" />
               </motion.div>
               <div>
-                <motion.h2 
+                <motion.h2
                   className="text-2xl font-bold text-[#D4AF37]"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -154,7 +145,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                 >
                   Scanner d'Œuvre
                 </motion.h2>
-                <motion.p 
+                <motion.p
                   className="text-[#C6B897] text-sm"
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -164,7 +155,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                 </motion.p>
               </div>
             </div>
-            
+
             {onClose && (
               <motion.button
                 onClick={handleManualClose}
@@ -178,35 +169,20 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
           </div>
 
           <div className="relative z-10 flex flex-col items-center gap-8">
-            {/* Zone de scan améliorée */}
+            {/* Zone de scan */}
             <div className="relative w-80 h-80">
-              {/* Cadre décoratif externe */}
-              <div className="absolute inset-0 border-2 border-[#D4AF37]/20 rounded-3xl"></div>
-              
-              {/* Zone de preview du scanner */}
               <div className="absolute inset-4 border-2 border-[#D4AF37]/60 rounded-2xl overflow-hidden shadow-lg shadow-[#D4AF37]/20">
                 {permission === "granted" ? (
-                  <QrReader
-                    constraints={{ 
-                      facingMode: "environment",
-                      aspectRatio: 1
-                    }}
-                    onResult={(result, error) => {
-                      if (result) handleScan(result);
-                      if (error) console.debug("Scan error:", error);
-                    }}
-                    videoContainerStyle={{
-                      padding: 0,
+                  <QrScanner
+                    delay={500}
+                    onError={handleError}
+                    onScan={handleScan}
+                    style={{
                       width: "100%",
                       height: "100%",
-                      background: "transparent"
+                      objectFit: "cover",
                     }}
-                    videoStyle={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover"
-                    }}
-                    scanDelay={500}
+                    facingMode="environment"
                   />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center bg-black/40 text-[#C6B897] p-6">
@@ -241,7 +217,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                 )}
               </div>
 
-              {/* Laser de scan animé */}
+              {/* Laser */}
               {permission === "granted" && scanning && (
                 <motion.div
                   className="absolute left-2 right-2 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent shadow-[0_0_20px_#D4AF37] rounded-full"
@@ -253,15 +229,9 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                   }}
                 />
               )}
-
-              {/* Coins décoratifs */}
-              <div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-[#D4AF37] rounded-tl-lg"></div>
-              <div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-[#D4AF37] rounded-tr-lg"></div>
-              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-[#D4AF37] rounded-bl-lg"></div>
-              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-[#D4AF37] rounded-br-lg"></div>
             </div>
 
-            {/* État du scan */}
+            {/* État */}
             <div className="text-center space-y-4">
               {scanning && permission === "granted" && (
                 <motion.div
@@ -284,42 +254,9 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                   <span>Œuvre détectée ! Redirection...</span>
                 </motion.div>
               )}
-
-              {/* Instructions */}
-              <motion.div
-                className="bg-[#D4AF37]/10 rounded-2xl p-6 border border-[#D4AF37]/20"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
-              >
-                <h3 className="text-[#D4AF37] font-semibold mb-3 flex items-center justify-center gap-2">
-                  <Building className="w-4 h-4" />
-                  Comment scanner
-                </h3>
-                <div className="grid grid-cols-3 gap-4 text-xs text-[#C6B897]">
-                  <div className="text-center">
-                    <div className="w-8 h-8 bg-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-[#D4AF37] font-bold">1</span>
-                    </div>
-                    <p>Placez le QR code dans le cadre</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-8 h-8 bg-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-[#D4AF37] font-bold">2</span>
-                    </div>
-                    <p>Maintenez stable</p>
-                  </div>
-                  <div className="text-center">
-                    <div className="w-8 h-8 bg-[#D4AF37]/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <span className="text-[#D4AF37] font-bold">3</span>
-                    </div>
-                    <p>Découvrez l'œuvre</p>
-                  </div>
-                </div>
-              </motion.div>
             </div>
 
-            {/* Flash de succès */}
+            {/* Flash succès */}
             <AnimatePresence>
               {flash && (
                 <motion.div
@@ -336,15 +273,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                     transition={{ delay: 0.2 }}
                   >
                     <div className="bg-black/80 rounded-2xl p-8 border-2 border-[#D4AF37] shadow-2xl">
-                      <motion.div
-                        animate={{ 
-                          scale: [1, 1.2, 1],
-                          rotate: [0, 5, -5, 0] 
-                        }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        <Sparkles className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
-                      </motion.div>
+                      <Sparkles className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
                       <p className="text-2xl font-bold text-[#D4AF37] text-center">
                         Œuvre Trouvée !
                       </p>
