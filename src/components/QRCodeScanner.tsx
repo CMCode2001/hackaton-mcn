@@ -8,8 +8,7 @@ import {
   Loader2,
   CameraOff,
   Zap,
-  Sparkles,
-  Building,
+  Sparkles
 } from "lucide-react";
 
 interface QRCodeScannerProps {

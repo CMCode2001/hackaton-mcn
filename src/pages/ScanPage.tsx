@@ -1,12 +1,10 @@
-// src/pages/ScanPage.tsx
 import { useEffect } from "react";
-import QRCodeScanner from "@/components/QRCodeScanner";
 import { useNavigate } from "react-router-dom";
+import QRCodeScanner from "@/components/QRCodeScanner";
 
-export function ScanPage() {
+export default function ScanPage() {
   const navigate = useNavigate();
 
-  // Bloquer le scroll pendant le scan
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -15,29 +13,21 @@ export function ScanPage() {
   }, []);
 
   const handleScanSuccess = (data: string) => {
-    if (!data) return;
-
     console.log("QR Code scanné:", data);
 
-    try {
-      // Si le QR code contient "/oeuvres/"
-      if (data.includes("/oeuvres/")) {
-        const parts = data.split("/oeuvres/");
-        const oeuvreId = parts[1] || "";
-        if (oeuvreId) navigate(`/oeuvres/${oeuvreId}`);
-        else navigate("/oeuvres");
-      } else {
-        // Si c'est juste un ID
-        navigate(`/oeuvres/${data}`);
+    if (data.includes("/oeuvres/")) {
+      const parts = data.split("/oeuvres/");
+      if (parts.length > 1) {
+        navigate(`/oeuvres/${parts[1]}`);
+        return;
       }
-    } catch (err) {
-      console.error("Erreur lors de la redirection du QR code:", err);
-      navigate("/");
     }
+    // Si c'est juste l'ID
+    navigate(`/oeuvres/${data}`);
   };
 
   const handleClose = () => {
-    navigate("/"); // Retour galerie
+    navigate("/");
   };
 
   return <QRCodeScanner onScanSuccess={handleScanSuccess} onClose={handleClose} />;
