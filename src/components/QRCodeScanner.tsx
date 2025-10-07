@@ -8,18 +8,25 @@ interface QRCodeScannerProps {
   onClose?: () => void;
 }
 
-const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose }) => {
-  const [permission, setPermission] = useState<"unknown" | "granted" | "denied">("unknown");
-  const [cameraFacingMode, setCameraFacingMode] = useState<"environment" | "user">("environment"); // Déjà sur caméra arrière
+const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
+  onScanSuccess,
+  onClose,
+}) => {
+  const [permission, setPermission] = useState<
+    "unknown" | "granted" | "denied"
+  >("unknown");
+  const [cameraFacingMode, setCameraFacingMode] = useState<
+    "environment" | "user"
+  >("environment"); // Déjà sur caméra arrière
   const [flash, setFlash] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const scannerRef = useRef<QrScanner>(null);
 
   const handleScan = (result: any) => {
     if (!result?.text || isProcessing) return;
-    
+
     console.log("QR Code détecté:", result.text);
-    
+
     try {
       let oeuvreId = "";
 
@@ -34,15 +41,15 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
         // Si c'est juste l'ID directement
         oeuvreId = result.text.trim();
       }
-      
+
       // Nettoyer l'ID (supprimer les slashes en début/fin)
-      oeuvreId = oeuvreId.replace(/^\/+|\/+$/g, '');
-      
+      oeuvreId = oeuvreId.replace(/^\/+|\/+$/g, "");
+
       if (oeuvreId) {
         console.log("ID d'œuvre extrait:", oeuvreId);
         setIsProcessing(true);
         setFlash(true);
-        
+
         setTimeout(() => {
           onScanSuccess(oeuvreId);
           setIsProcessing(false);
@@ -65,20 +72,23 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
 
   const requestPermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
           facingMode: cameraFacingMode,
           // Option supplémentaire pour forcer la caméra arrière sur mobile
           ...(cameraFacingMode === "environment" && {
             width: { ideal: 1280 },
-            height: { ideal: 720 }
-          })
-        } 
+            height: { ideal: 720 },
+          }),
+        },
       });
       setPermission("granted");
     } catch (err: any) {
       console.error("Erreur permission caméra:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+      if (
+        err.name === "NotAllowedError" ||
+        err.name === "PermissionDeniedError"
+      ) {
         setPermission("denied");
       } else {
         setPermission("denied");
@@ -127,9 +137,13 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                 <QrCode className="w-8 h-8 text-black" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-[#D4AF37]">Scanner d'Œuvre</h2>
+                <h2 className="text-2xl font-bold text-[#D4AF37]">
+                  Scanner d'Œuvre
+                </h2>
                 <p className="text-[#C6B897] text-sm">
-                  Caméra {cameraFacingMode === "environment" ? "arrière" : "avant"} active
+                  Caméra{" "}
+                  {cameraFacingMode === "environment" ? "arrière" : "avant"}{" "}
+                  active
                 </p>
               </div>
             </div>
@@ -138,7 +152,9 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
               <button
                 onClick={switchCamera}
                 className="p-2 text-[#D4AF37] hover:text-white hover:bg-[#D4AF37]/10 rounded-xl transition-all duration-300 border border-[#D4AF37]/30"
-                title={`Passer à la caméra ${cameraFacingMode === "environment" ? "avant" : "arrière"}`}
+                title={`Passer à la caméra ${
+                  cameraFacingMode === "environment" ? "avant" : "arrière"
+                }`}
               >
                 <Camera className="w-5 h-5" />
               </button>
@@ -157,22 +173,24 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
             {permission === "granted" && (
               <QrScanner
                 ref={scannerRef}
-                delay={300}
+                // delay={300}
                 onError={handleError}
                 onScan={handleScan}
                 constraints={{
-                  video: { facingMode: cameraFacingMode }
+                  video: { facingMode: cameraFacingMode },
                 }}
-                style={{ 
-                  width: "100%", 
-                  height: "100%", 
-                  objectFit: "cover" 
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  // objectFit: "cover"
                 }}
               />
             )}
             {permission === "unknown" && (
               <div className="flex items-center justify-center h-full">
-                <p className="text-[#C6B897] text-center">Demande d'accès caméra...</p>
+                <p className="text-[#C6B897] text-center">
+                  Demande d'accès caméra...
+                </p>
               </div>
             )}
             {permission === "denied" && (
@@ -195,7 +213,8 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
               Positionnez le QR code dans le cadre pour le scanner
             </p>
             <p className="text-[#D4AF37] text-xs mt-2">
-              Caméra {cameraFacingMode === "environment" ? "arrière" : "avant"} active
+              Caméra {cameraFacingMode === "environment" ? "arrière" : "avant"}{" "}
+              active
             </p>
           </div>
 
@@ -214,7 +233,9 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({ onScanSuccess, onClose })
                   exit={{ scale: 0 }}
                 >
                   <Sparkles className="w-16 h-16 text-[#D4AF37] mx-auto mb-4" />
-                  <p className="text-2xl font-bold text-[#D4AF37]">Œuvre trouvée !</p>
+                  <p className="text-2xl font-bold text-[#D4AF37]">
+                    Œuvre trouvée !
+                  </p>
                   <p className="text-[#C6B897] mt-2">Redirection...</p>
                 </motion.div>
               </motion.div>
