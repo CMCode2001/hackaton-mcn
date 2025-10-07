@@ -4,6 +4,7 @@ import { LandingPage } from './pages/LandingPage';
 import { OeuvresPage } from './pages/OeuvresPage';
 import OeuvreDetailPage from './pages/OeuvreDetailPage';
 import ScanPage from './pages/ScanPage';
+import AdminQRCodeGenerator from './pages/Admin/AdminQRCodeGenerator';
 // import { SmoothCursor } from './components/ui/smooth-cursor';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <main className="flex-1">
           <Routes>
             <Route path="/" element={<LandingPage />} />
+            <Route path="/mcn-admin-generator" element={<AdminQRCodeGenerator />} />
             <Route path="/oeuvres" element={<OeuvresPage />} />
             <Route path="/oeuvres/:id" element={<OeuvreDetailPage />} />
             <Route path="/scan" element={<ScanPage />} />

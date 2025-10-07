@@ -1,34 +1,19 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import QRCodeScanner from "@/components/QRCodeScanner";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function ScanPage() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, []);
-
-  const handleScanSuccess = (data: string) => {
-    console.log("QR Code scanné:", data);
-
-    if (data.includes("/oeuvres/")) {
-      const parts = data.split("/oeuvres/");
-      if (parts.length > 1) {
-        navigate(`/oeuvres/${parts[1]}`);
-        return;
-      }
-    }
-    // Si c'est juste l'ID
-    navigate(`/oeuvres/${data}`);
+  const handleScanSuccess = (oeuvreId: string) => {
+    console.log("Œuvre scannée :", oeuvreId);
+    navigate(`/oeuvres/${oeuvreId}`);
   };
 
-  const handleClose = () => {
-    navigate("/");
-  };
-
-  return <QRCodeScanner onScanSuccess={handleScanSuccess} onClose={handleClose} />;
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-black/90 text-white">
+      <h1 className="text-3xl font-bold text-[#D4AF37] mb-6">Scanner d'Œuvre</h1>
+      <QRCodeScanner onScanSuccess={handleScanSuccess} />
+    </div>
+  );
 }
