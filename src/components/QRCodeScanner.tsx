@@ -15,9 +15,6 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   const [permission, setPermission] = useState<
     "unknown" | "granted" | "denied"
   >("unknown");
-  const [cameraFacingMode, setCameraFacingMode] = useState<
-    "environment" | "user"
-  >("environment"); // Déjà sur caméra arrière
   const [flash, setFlash] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const scannerRef = useRef<QrScanner>(null);
@@ -72,23 +69,18 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 
   const requestPermission = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: cameraFacingMode,
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: "environment",
           // Option supplémentaire pour forcer la caméra arrière sur mobile
-          ...(cameraFacingMode === "environment" && {
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          }),
-        },
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
       });
       setPermission("granted");
     } catch (err: any) {
       console.error("Erreur permission caméra:", err);
-      if (
-        err.name === "NotAllowedError" ||
-        err.name === "PermissionDeniedError"
-      ) {
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
         setPermission("denied");
       } else {
         setPermission("denied");
@@ -96,12 +88,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     }
   };
 
-  const switchCamera = () => {
-    const newMode = cameraFacingMode === "environment" ? "user" : "environment";
-    setCameraFacingMode(newMode);
-  };
-
-  // Charger directement avec la caméra arrière
+  // Charger directly with the back camera
   useEffect(() => {
     requestPermission();
   }, []);
@@ -122,7 +109,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
         exit={{ opacity: 0 }}
       >
         <motion.div
-          className="relative bg-gradient-to-br from-[#0A0603] to-[#1a120b] border-2 border-[#D4AF37]/40 rounded-3xl p-8 w-full max-w-2xl shadow-2xl overflow-hidden"
+          className="relative bg-gradient-to-br from-[#0A0603] to-[#1a120b] border-2 border-[#D4AF37]/40 rounded-3xl p-4 sm:p-8 w-full max-w-2xl shadow-2xl overflow-hidden"
           initial={{ scale: 0.8, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.8, opacity: 0, y: 20 }}
@@ -137,27 +124,14 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                 <QrCode className="w-8 h-8 text-black" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-[#D4AF37]">
-                  Scanner d'Œuvre
-                </h2>
+                <h2 className="text-2xl font-bold text-[#D4AF37]">Scanner d'Œuvre</h2>
                 <p className="text-[#C6B897] text-sm">
-                  Caméra{" "}
-                  {cameraFacingMode === "environment" ? "arrière" : "avant"}{" "}
-                  active
+                  Veuillez scanner le QR code
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <button
-                onClick={switchCamera}
-                className="p-2 text-[#D4AF37] hover:text-white hover:bg-[#D4AF37]/10 rounded-xl transition-all duration-300 border border-[#D4AF37]/30"
-                title={`Passer à la caméra ${
-                  cameraFacingMode === "environment" ? "avant" : "arrière"
-                }`}
-              >
-                <Camera className="w-5 h-5" />
-              </button>
               {onClose && (
                 <button
                   onClick={onClose}
@@ -169,7 +143,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
             </div>
           </div>
 
-          <div className="relative w-80 h-80 mx-auto border-2 border-[#D4AF37]/60 rounded-2xl overflow-hidden shadow-lg shadow-[#D4AF37]/20">
+          <div className="relative w-full h-auto aspect-square max-w-sm mx-auto border-2 border-[#D4AF37]/60 rounded-2xl overflow-hidden shadow-lg shadow-[#D4AF37]/20">
             {permission === "granted" && (
               <QrScanner
                 ref={scannerRef}
@@ -177,7 +151,10 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                 onError={handleError}
                 onScan={handleScan}
                 constraints={{
-                  video: { facingMode: cameraFacingMode },
+                  video: { 
+                    facingMode: 'environment',
+                    zoom: 1
+                  }
                 }}
                 style={{
                   width: "100%",
@@ -211,10 +188,6 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           <div className="mt-6 text-center">
             <p className="text-[#C6B897] text-sm">
               Positionnez le QR code dans le cadre pour le scanner
-            </p>
-            <p className="text-[#D4AF37] text-xs mt-2">
-              Caméra {cameraFacingMode === "environment" ? "arrière" : "avant"}{" "}
-              active
             </p>
           </div>
 
