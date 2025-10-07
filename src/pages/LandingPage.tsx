@@ -87,7 +87,7 @@ export function LandingPage() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
           }`}
         >
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-tight mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold leading-tight mb-6">
             <span className="block text-[#D4AF37] drop-shadow-[0_0_20px_rgba(212,175,55,0.7)]">
               {t("landing.hero.title") ||
                 "Plongez au cœur de l’histoire africaine"}
@@ -98,16 +98,16 @@ export function LandingPage() {
             </span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-[#C6B897] max-w-3xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg sm:text-xl md:text-2xl text-[#C6B897] max-w-3xl mx-auto mb-10 leading-relaxed">
             {t("landing.hero.description") ||
               "Explorez les civilisations, les arts et les légendes qui ont façonné notre héritage. Une expérience numérique qui transcende le temps."}
           </p>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-6 mt-8">
+          <div className="flex flex-col sm:flex-row justify-center gap-4 md:gap-6 mt-8">
             {/* Commencer l’expérience */}
             <button
               onClick={handleStartExperience}
-              className="group relative overflow-hidden bg-gradient-to-r from-[#A6753D] to-[#D4AF37] text-white px-10 py-5 rounded-2xl font-semibold text-xl transition-all duration-500 hover:scale-105 shadow-[0_0_20px_rgba(212,175,55,0.5)]"
+              className="group relative overflow-hidden bg-gradient-to-r from-[#A6753D] to-[#D4AF37] text-white px-8 md:px-10 py-4 md:py-5 rounded-2xl font-semibold text-lg md:text-xl transition-all duration-500 hover:scale-105 shadow-[0_0_20px_rgba(212,175,55,0.5)]"
             >
               <span className="relative z-10 flex items-center gap-3">
                 <Sparkles className="w-6 h-6 animate-pulse" />
@@ -119,7 +119,7 @@ export function LandingPage() {
             {/* Explorer */}
             <Link
               to="/oeuvres"
-              className="relative overflow-hidden border-2 border-[#D4AF37] text-[#D4AF37] px-10 py-5 rounded-2xl font-semibold text-xl hover:text-white hover:bg-[#D4AF37]/10 transition-all duration-500 flex items-center gap-3"
+              className="relative overflow-hidden border-2 border-[#D4AF37] text-[#D4AF37] px-8 md:px-10 py-4 md:py-5 rounded-2xl font-semibold text-lg md:text-xl hover:text-white hover:bg-[#D4AF37]/10 transition-all duration-500 flex items-center gap-3 justify-center"
             >
               <LassoSelect className="w-6 h-6" />
               {t("landing.cta.explore") || "Explorer nos œuvres"}

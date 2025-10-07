@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { QrCode, Home, Image as ImageIcon, Globe } from "lucide-react";
+import { QrCode, Home, Image as ImageIcon, Globe, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import LogoMCN from "../assets/img/Logo MCN-Digit.png";
@@ -11,6 +11,7 @@ export function Header() {
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [hoverLogo, setHoverLogo] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -87,8 +88,15 @@ export function Header() {
             />
           </Link>
 
-          {/* --- NAVIGATION --- */}
-          <nav className="flex items-center gap-6 relative">
+          {/* --- MOBILE MENU BUTTON --- */}
+          <div className="md:hidden">
+            <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="text-white">
+              {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+
+          {/* --- DESKTOP NAVIGATION --- */}
+          <nav className="hidden md:flex items-center gap-6 relative">
             {navItems.map((item, i) => (
               <motion.div
                 key={item.path}
@@ -161,6 +169,77 @@ export function Header() {
             </div>
           </nav>
         </motion.div>
+
+        {/* --- MOBILE MENU --- */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="md:hidden mt-2 bg-white/5 border border-white/10 rounded-lg p-4"
+            >
+              <nav className="flex flex-col gap-4">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                      isActive(item.path)
+                        ? "bg-white/10 text-[#ffb347]"
+                        : "text-[#e3e3e3] hover:bg-white/10 hover:text-[#ffb347]"
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.icon}
+                    <span>{item.label}</span>
+                  </Link>
+                ))}
+                {/* --- LANG SELECTOR --- */}
+                <div className="relative pt-2 border-t border-white/10">
+                  <button
+                    onClick={() => setShowLangMenu(!showLangMenu)}
+                    className="w-full flex justify-between items-center px-3 py-2 rounded-md text-[#e3e3e3] hover:bg-white/10 hover:text-[#ffb347] transition"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Globe className="w-4 h-4" />
+                      <span className="uppercase text-xs font-semibold tracking-wide">
+                        {i18n.language}
+                      </span>
+                    </div>
+                    <span className="text-xs">▼</span>
+                  </button>
+
+                  <AnimatePresence>
+                    {showLangMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-1 bg-[#1a1a1a]/95 backdrop-blur-md border border-white/10 rounded-xl shadow-xl py-2 z-50"
+                      >
+                        {["fr", "en", "wo"].map((lng) => (
+                          <button
+                            key={lng}
+                            onClick={() => changeLanguage(lng)}
+                            className={`w-full px-4 py-2 text-left text-sm rounded-lg transition-all ${
+                              i18n.language === lng
+                                ? "bg-white/10 text-white font-semibold"
+                                : "text-gray-300 hover:bg-white/10 hover:text-white"
+                            }`}
+                          >
+                            {t(`language.${lng}`)}{" "}
+                            <span className="ml-1 text-xs opacity-70">({lng})</span>
+                          </button>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </motion.header>
   );
