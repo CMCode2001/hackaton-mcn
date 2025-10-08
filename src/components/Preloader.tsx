@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import logo from '../assets/img/Logo MCN-Digit.JPG';
+import logo from '../assets/img/Logo MCN-Digit.jpg';
 
 export const Preloader = () => {
   return (
