@@ -13,7 +13,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   DoorOpen,
   Map as MapIcon,
-  X,
   ArrowLeft,
   Home,
   Map,
@@ -23,7 +22,7 @@ import {
   Users,
   GalleryVertical,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
 // ---- Assets ----
@@ -46,23 +45,23 @@ const ROOM_CONFIG = {
     ambientColor: "#D4AF37",
     doors: [
       {
-        position: [-3, 1.5, 2], // Beaucoup plus éloigné
+        position: [-4, 1.5, 2],
         target: "niveau1",
-        label: "Niveau 1 - Les Origines",
+        label: " Les Origines",
         icon: "🏺",
         description: "Des origines à l'antiquité",
       },
       {
-        position: [1, 1.5, -3], // Beaucoup plus éloigné
+        position: [0, 1.5, 0],
         target: "niveau2",
-        label: "Niveau 2 - Les Civilisations",
+        label: "Les Civilisations",
         icon: "🕌",
         description: "Empires et cultures médiévales",
       },
       {
-        position: [3, 1.5, 4], // Beaucoup plus éloigné
+        position: [4, 1.5, 2],
         target: "niveau3",
-        label: "Niveau 3 - Les Diasporas",
+        label: " Les Diasporas",
         icon: "⛓",
         description: "De la traite aux indépendances",
       },
@@ -247,32 +246,34 @@ function FloatingDoor({
   useFrame(() => {
     if (ref.current) {
       ref.current.rotation.y += 0.002;
-      ref.current.position.y = door.position[1] + Math.sin(Date.now() * 0.001) * 0.15;
+      ref.current.position.y = door.position[1] + Math.sin(Date.now() * 0.001) * 0.1;
     }
   });
 
   return (
-    <Float speed={1.2} rotationIntensity={0.4} floatIntensity={0.6}>
+    <Float speed={1} rotationIntensity={0.2} floatIntensity={0.4}>
       <group ref={ref} position={door.position}>
-        <Html center distanceFactor={12} zIndexRange={[100, 0]}>
+        <Html center distanceFactor={10} zIndexRange={[100, 0]}>
           <motion.button
             onClick={() => onSelect(door)}
-            whileHover={{ scale: 1.15, y: -8 }}
-            className="bg-gradient-to-br from-black/90 to-[#1a120b] backdrop-blur-xl border-2 border-[#D4AF37] rounded-2xl p-6 text-white font-semibold transition-all duration-300 hover:shadow-2xl hover:shadow-[#D4AF37]/30 group min-w-[200px]"
+            whileHover={{ scale: 1.1, y: -10 }}
+            className="bg-black/50 backdrop-blur-md border border-[#D4AF37]/30 rounded-2xl text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#D4AF37]/20 hover:border-[#D4AF37]/60 group w-[240px] overflow-hidden"
           >
-            <div className="text-center">
-              <div className="text-5xl mb-3 group-hover:scale-110 transition-transform duration-300">
+            <div className="p-5 text-center">
+              <div className="text-5xl bg-black/40 p-4 rounded-full inline-block text-[#D4AF37] group-hover:scale-110 transition-transform duration-300">
                 {door.icon}
               </div>
-              <div className="text-[#D4AF37] font-bold text-xl mb-2">
-                {door.label}
+              <div className="mt-4">
+                <div className="text-[#D4AF37] font-bold text-xl mb-1">
+                  {door.label}
+                </div>
+                <div className="text-[#C6B897] text-sm leading-snug px-2">
+                  {door.description}
+                </div>
               </div>
-              <div className="text-[#C6B897] text-sm leading-tight">
-                {door.description}
-              </div>
-              <div className="mt-3 text-xs text-[#D4AF37] bg-[#D4AF37]/10 rounded-full px-3 py-1 inline-block">
-                Entrer ›
-              </div>
+            </div>
+            <div className="mt-1 text-sm font-semibold text-center text-black bg-[#D4AF37] py-2 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+              Explorer le Niveau
             </div>
           </motion.button>
         </Html>
@@ -335,72 +336,7 @@ function FloatingArtwork({
   );
 }
 
-// ------------------ Modal AMÉLIORÉ ------------------
-function ArtworkModal({
-  artwork,
-  onClose,
-}: {
-  artwork: any;
-  onClose: () => void;
-}) {
-  return (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-6"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-    >
-      <motion.div
-        onClick={(e) => e.stopPropagation()}
-        className="bg-gradient-to-br from-[#1a120b] to-[#2d1b0e] rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl border-2 border-[#D4AF37]/30"
-        initial={{ scale: 0.9, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-      >
-        <div className="flex gap-6 p-8">
-          <div className="w-64 h-64 rounded-xl overflow-hidden border-2 border-[#D4AF37]/30 bg-[#2d1b0e]">
-            <SafeImage
-              src={artwork.img}
-              alt={artwork.title}
-              fallbackEmoji="🖼️"
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="flex-1">
-            <div className="flex justify-between items-start mb-4">
-              <h2 className="text-[#D4AF37] text-3xl font-bold leading-tight">
-                {artwork.title}
-              </h2>
-              <button 
-                onClick={onClose} 
-                className="text-[#D4AF37] hover:text-white transition-colors p-2 hover:bg-[#D4AF37]/10 rounded-lg"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            
-            {artwork.category && (
-              <div className="inline-block text-sm text-[#C6B897] bg-[#D4AF37]/10 rounded-full px-3 py-1 mb-4">
-                {artwork.category}
-              </div>
-            )}
-            
-            <p className="text-[#C6B897] text-lg leading-relaxed mb-6">
-              {artwork.description}
-            </p>
-            
-            <button
-              onClick={onClose}
-              className="px-6 py-3 bg-[#D4AF37]/20 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/30 transition-colors border border-[#D4AF37]/30 font-semibold"
-            >
-              Fermer
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  );
-}
+
 
 // ------------------ Scene AMÉLIORÉE ------------------
 function Scene({
@@ -522,11 +458,12 @@ function Scene({
 // ------------------ Main Page CORRIGÉE ------------------
 export function OeuvresPage() {
   const [currentRoom, setCurrentRoom] = useState("entrance");
-  const [selectedArtwork, setSelectedArtwork] = useState<any | null>(null);
+  
   const [showMap, setShowMap] = useState(true);
   const [playing, setPlaying] = useState(true); // Son activé par défaut
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { t } = useTranslation();
+  const navigate = useNavigate();
 
   // Initialisation de l'audio - DÉMARRAGE AUTOMATIQUE
   useEffect(() => {
@@ -578,8 +515,14 @@ export function OeuvresPage() {
   const goToEntrance = () => setCurrentRoom("entrance");
 
   const handleSelectGallery = (gallery: any) => {
-    if (gallery.id && ROOM_CONFIG[gallery.id]) {
-      setCurrentRoom(gallery.id);
+    if (gallery.target && ROOM_CONFIG[gallery.target]) {
+      setCurrentRoom(gallery.target);
+    }
+  };
+
+  const handleSelectArtwork = (artwork: any) => {
+    if (artwork.id) {
+      navigate(`/oeuvres/${artwork.id}`);
     }
   };
 
@@ -593,7 +536,7 @@ export function OeuvresPage() {
         >
           <Scene
             currentRoom={currentRoom}
-            onSelectArtwork={setSelectedArtwork}
+            onSelectArtwork={handleSelectArtwork}
             onSelectGallery={handleSelectGallery}
           />
         </Canvas>
@@ -755,15 +698,7 @@ export function OeuvresPage() {
         )}
       </div>
 
-      {/* Modal */}
-      <AnimatePresence>
-        {selectedArtwork && (
-          <ArtworkModal
-            artwork={selectedArtwork}
-            onClose={() => setSelectedArtwork(null)}
-          />
-        )}
-      </AnimatePresence>
+      
     </div>
   );
 }
