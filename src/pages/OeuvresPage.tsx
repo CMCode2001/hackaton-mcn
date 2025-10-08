@@ -459,7 +459,7 @@ function Scene({
 export function OeuvresPage() {
   const [currentRoom, setCurrentRoom] = useState("entrance");
   
-  const [showMap, setShowMap] = useState(true);
+  const [showMap, setShowMap] = useState(false);
   const [playing, setPlaying] = useState(true); // Son activé par défaut
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { t } = useTranslation();
