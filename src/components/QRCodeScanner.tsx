@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserQRCodeReader, IScannerControls } from "@zxing/library";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, QrCode, Sparkles, Camera, Keyboard } from "lucide-react";
+import { X, QrCode, Sparkles } from "lucide-react";
 
 interface QRCodeScannerProps {
   onScanSuccess: (oeuvreId: string) => void;
@@ -17,8 +17,6 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   >("unknown");
   const [flash, setFlash] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [manualEntry, setManualEntry] = useState(false);
-  const [manualCode, setManualCode] = useState("");
   const videoRef = useRef<HTMLVideoElement>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
 
@@ -65,13 +63,6 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
       }
     } catch (error) {
       console.error("Erreur lors du traitement du QR code:", error);
-    }
-  };
-
-  const handleManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (manualCode.trim()) {
-      processQRResult(manualCode.trim());
     }
   };
 
@@ -186,10 +177,10 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4AF37]">
-                  {manualEntry ? "Saisie Manuelle" : "Scanner d'Œuvre"}
+                  Scanner d'Œuvre
                 </h2>
                 <p className="text-[#C6B897] text-xs sm:text-sm">
-                  {manualEntry ? "Entrez le code manuellement" : "Caméra arrière active"}
+                  Caméra arrière active
                 </p>
               </div>
             </div>
@@ -206,101 +197,55 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
             </div>
           </div>
 
-          {/* Zone de scan ou saisie manuelle */}
+          {/* Zone de scan */}
           <div className="relative w-full mx-auto border-2 border-[#D4AF37]/60 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg shadow-[#D4AF37]/20 bg-black">
-            {manualEntry ? (
-              // Formulaire de saisie manuelle
-              <div className="p-6 sm:p-8">
-                <form onSubmit={handleManualSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-[#C6B897] text-sm mb-2">
-                      Code de l'œuvre
-                    </label>
-                    <input
-                      type="text"
-                      value={manualCode}
-                      onChange={(e) => setManualCode(e.target.value)}
-                      className="w-full px-4 py-3 bg-[#0A0603] border border-[#D4AF37]/40 rounded-lg text-white placeholder-[#C6B897]/60 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-colors"
-                      placeholder="Ex: QR-001 ou https://..."
-                      autoFocus
-                    />
+            <div className="aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative">
+              {permission === "granted" && (
+                <video
+                  ref={videoRef}
+                  className="w-full h-full object-cover"
+                  style={{ transform: "scale(1.05)" }} // Légère correction de zoom
+                />
+              )}
+              {permission === "unknown" && (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mx-auto mb-2"></div>
+                    <p className="text-[#C6B897] text-sm">Initialisation caméra...</p>
                   </div>
-                  <div className="flex gap-3">
-                    <button
-                      type="submit"
-                      className="flex-1 bg-gradient-to-br from-[#D4AF37] to-[#E6C158] text-black py-3 rounded-lg font-semibold hover:from-[#E6C158] hover:to-[#F4D03F] transition-all duration-300 shadow-lg"
-                    >
-                      Valider
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setManualEntry(false)}
-                      className="flex-1 bg-[#1a120b] border border-[#D4AF37]/40 text-[#D4AF37] py-3 rounded-lg font-semibold hover:bg-[#D4AF37]/10 transition-all duration-300"
-                    >
-                      Retour
-                    </button>
-                  </div>
-                </form>
-              </div>
-            ) : (
-              // Scanner caméra
-              <div className="aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative">
-                {permission === "granted" && (
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    style={{ transform: "scale(1.05)" }} // Légère correction de zoom
-                  />
-                )}
-                {permission === "unknown" && (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mx-auto mb-2"></div>
-                      <p className="text-[#C6B897] text-sm">Initialisation caméra...</p>
-                    </div>
-                  </div>
-                )}
-                {permission === "denied" && (
-                  <div className="flex items-center justify-center h-full p-4">
-                    <div className="text-center">
-                      <p className="text-red-400 mb-3 text-sm sm:text-base">
-                        Accès caméra refusé
-                      </p>
-                      <button
-                        onClick={requestPermission}
-                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#E6C158] transition-colors text-sm sm:text-base"
-                      >
-                        Réautoriser l'accès
-                      </button>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Cadre de guidage */}
-                <div className="absolute inset-0 pointer-events-none border-8 border-transparent">
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 border-2 border-[#D4AF37] rounded-lg shadow-lg"></div>
                 </div>
+              )}
+              {permission === "denied" && (
+                <div className="flex items-center justify-center h-full p-4">
+                  <div className="text-center">
+                    <p className="text-red-400 mb-3 text-sm sm:text-base">
+                      Accès caméra refusé
+                    </p>
+                    <button
+                      onClick={requestPermission}
+                      className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#E6C158] transition-colors text-sm sm:text-base"
+                    >
+                      Réautoriser l'accès
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* Cadre de guidage */}
+              <div className="absolute inset-0 pointer-events-none border-8 border-transparent">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 border-2 border-[#D4AF37] rounded-lg shadow-lg"></div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Instructions */}
           <div className="mt-4 sm:mt-6 text-center">
             <p className="text-[#C6B897] text-xs sm:text-sm">
-              {manualEntry 
-                ? "Entrez le code QR ou l'URL de l'œuvre" 
-                : "Positionnez le QR code dans le cadre"}
+              Positionnez le QR code dans le cadre
             </p>
-            
-            {!manualEntry && (
-              <button
-                onClick={() => setManualEntry(true)}
-                className="mt-2 text-[#D4AF37] hover:text-[#E6C158] transition-colors flex items-center justify-center gap-2 mx-auto text-xs"
-              >
-                <Keyboard className="w-4 h-4" />
-                Saisie manuelle
-              </button>
-            )}
+            <p className="text-[#D4AF37]/70 text-xs mt-1">
+              La détection est automatique
+            </p>
           </div>
 
           {/* Overlay de succès */}
