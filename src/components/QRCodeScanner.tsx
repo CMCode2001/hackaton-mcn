@@ -70,13 +70,15 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 
 
   const startScanner = async () => {
-    if (isProcessing || !videoRef.current) return;
+    if (isProcessing || !videoRef.current || !codeReaderRef.current) return;
+    console.log("Starting scanner...");
 
     try {
-      const codeReader = new BrowserQRCodeReader();
-      const videoInputDevices = await codeReader.listVideoInputDevices();
+      const videoInputDevices = await codeReaderRef.current.listVideoInputDevices();
+      console.log("Video input devices:", videoInputDevices);
 
       if (videoInputDevices.length === 0) {
+        console.error("No camera devices found.");
         throw new Error("Aucune caméra détectée.");
       }
 
@@ -85,18 +87,21 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
       );
       
       const deviceId = rearCamera?.deviceId || videoInputDevices[0]?.deviceId;
+      console.log("Selected deviceId:", deviceId);
 
       if (!deviceId) {
         throw new Error("Impossible de trouver un ID de caméra valide.");
       }
 
       setPermission("granted");
+      console.log("Permission granted, starting decoding...");
 
-      controlsRef.current = codeReader.decodeFromVideoDevice(
+      controlsRef.current = codeReaderRef.current.decodeFromVideoDevice(
         deviceId,
         videoRef.current,
         (result, error, controls) => {
           if (result) {
+            console.log("QR code detected:", result);
             controls.stop();
             processQRResult(result.getText());
           }
@@ -112,9 +117,11 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   };
 
   const requestPermissionAndStart = async () => {
+    console.log("Requesting camera permission...");
     try {
       // Demander la permission en premier
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      console.log("Camera permission granted.");
       stream.getTracks().forEach(track => track.stop());
       startScanner();
     } catch (error) {
@@ -123,7 +130,10 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     }
   };
 
+  const codeReaderRef = useRef<BrowserQRCodeReader | null>(null);
+
   useEffect(() => {
+    codeReaderRef.current = new BrowserQRCodeReader();
     requestPermissionAndStart();
 
     return () => {
