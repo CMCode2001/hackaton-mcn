@@ -1,5 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from "@zxing/library";
+import {
+  BrowserMultiFormatReader,
+  BarcodeFormat,
+  DecodeHintType,
+} from "@zxing/library";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, QrCode, Sparkles } from "lucide-react";
 
@@ -63,23 +67,36 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 
     const startScanning = async () => {
       try {
-        await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        console.log("Initialisation du scanner...");
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+
+        console.log("Accès caméra obtenu, démarrage du flux...");
         setPermission("granted");
 
         if (videoRef.current) {
-          codeReader.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+
+          codeReader.decodeFromVideoDevice(null, videoRef.current, (result, err) => {
             if (result) {
+              console.log("Résultat brut détecté:", result.getText());
               processQRResult(result.getText());
               codeReader.reset();
             }
-            if (err && !(err.constructor.name === 'NotFoundException')) {
+            if (err && err.name !== "NotFoundException") {
               console.error(err);
             }
           });
         }
-      } catch (err) {
-        setPermission("denied");
-        console.error(err);
+      } catch (err: any) {
+        console.error("Erreur d'accès caméra:", err);
+        if (err.name === "NotAllowedError") {
+          setPermission("denied");
+        } else {
+          setPermission("unknown");
+        }
       }
     };
 
@@ -87,6 +104,10 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
 
     return () => {
       codeReader.reset();
+      if (videoRef.current?.srcObject) {
+        const tracks = (videoRef.current.srcObject as MediaStream).getTracks();
+        tracks.forEach((track) => track.stop());
+      }
     };
   }, []);
 
@@ -105,9 +126,11 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           exit={{ scale: 0.8, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25 }}
         >
+          {/* Effets décoratifs */}
           <div className="absolute top-0 left-0 w-32 h-32 bg-[#D4AF37]/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
 
+          {/* En-tête */}
           <div className="relative z-10 flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="p-2 sm:p-3 bg-gradient-to-br from-[#D4AF37] to-[#E6C158] rounded-xl sm:rounded-2xl shadow-lg">
@@ -123,35 +146,39 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
               </div>
             </div>
 
-            <div className="flex items-center gap-2 sm:gap-3">
-              {onClose && (
-                <button
-                  onClick={onClose}
-                  className="p-1.5 sm:p-2 text-[#D4AF37] hover:text-white hover:bg-[#D4AF37]/10 rounded-lg sm:rounded-xl transition-all duration-300 border border-[#D4AF37]/30"
-                >
-                  <X className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
-                </button>
-              )}
-            </div>
+            {onClose && (
+              <button
+                onClick={onClose}
+                className="p-1.5 sm:p-2 text-[#D4AF37] hover:text-white hover:bg-[#D4AF37]/10 rounded-lg sm:rounded-xl transition-all duration-300 border border-[#D4AF37]/30"
+              >
+                <X className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+              </button>
+            )}
           </div>
 
-          <div className="relative w-full mx-auto border-2 border-[#D4AF37]/60 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg shadow-[#D4AF37]/20 bg-black">
-            <div className="aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative">
+          {/* Zone de capture */}
+          <div className="relative w-full mx-auto border-2 border-[#D4AF37]/60 rounded-xl overflow-hidden shadow-lg bg-black">
+            <div className="aspect-square w-full max-w-xs sm:max-w-sm mx-auto relative">
               {permission === "granted" && (
                 <video
                   ref={videoRef}
                   className="w-full h-full object-cover"
-                  style={{ transform: "scale(1.05)" }}
+                  playsInline
+                  muted
                 />
               )}
+
               {permission === "unknown" && (
                 <div className="flex items-center justify-center h-full">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mx-auto mb-2"></div>
-                    <p className="text-[#C6B897] text-sm">Initialisation caméra...</p>
+                    <p className="text-[#C6B897] text-sm">
+                      Initialisation caméra...
+                    </p>
                   </div>
                 </div>
               )}
+
               {permission === "denied" && (
                 <div className="flex items-center justify-center h-full p-4">
                   <div className="text-center">
@@ -159,7 +186,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                       Accès caméra refusé
                     </p>
                     <button
-                      onClick={() => window.location.reload()} // Simple reload to re-trigger permission prompt
+                      onClick={() => window.location.reload()}
                       className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#E6C158] transition-colors text-sm sm:text-base"
                     >
                       Réautoriser l'accès
@@ -167,19 +194,21 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                   </div>
                 </div>
               )}
-              
+
+              {/* Cadre de visée */}
               <div className="absolute inset-0 pointer-events-none border-8 border-transparent">
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 border-2 border-[#D4AF37] rounded-lg shadow-lg"></div>
               </div>
             </div>
           </div>
 
-          <div className="mt-4 sm:mt-6 text-center">
+          <div className="mt-4 text-center">
             <p className="text-[#C6B897] text-xs sm:text-sm">
               Positionnez le QR code dans le cadre
             </p>
           </div>
 
+          {/* Flash de succès */}
           <AnimatePresence>
             {flash && (
               <motion.div
@@ -189,16 +218,18 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                 exit={{ opacity: 0 }}
               >
                 <motion.div
-                  className="bg-black/90 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 border-2 border-[#D4AF37] shadow-2xl text-center mx-4"
+                  className="bg-black/90 rounded-xl p-6 border-2 border-[#D4AF37] shadow-2xl text-center"
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
                 >
-                  <Sparkles className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 text-[#D4AF37] mx-auto mb-2 sm:mb-4" />
-                  <p className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4AF37]">
+                  <Sparkles className="w-12 h-12 text-[#D4AF37] mx-auto mb-4" />
+                  <p className="text-xl font-bold text-[#D4AF37]">
                     Œuvre trouvée !
                   </p>
-                  <p className="text-[#C6B897] text-sm sm:text-base mt-1 sm:mt-2">Redirection...</p>
+                  <p className="text-[#C6B897] text-sm mt-2">
+                    Redirection...
+                  </p>
                 </motion.div>
               </motion.div>
             )}
