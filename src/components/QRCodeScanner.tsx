@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import QrScanner from "react-qr-scanner";
+import { BrowserQRCodeReader, IScannerControls } from "@zxing/library";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, QrCode, Sparkles, Camera } from "lucide-react";
+import { X, QrCode, Sparkles,  Keyboard } from "lucide-react";
 
 interface QRCodeScannerProps {
   onScanSuccess: (oeuvreId: string) => void;
@@ -17,26 +17,29 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   >("unknown");
   const [flash, setFlash] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const scannerRef = useRef<QrScanner>(null);
+  const [manualEntry, setManualEntry] = useState(false);
+  const [manualCode, setManualCode] = useState("");
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const controlsRef = useRef<IScannerControls | null>(null);
 
-  const handleScan = (result: any) => {
-    if (!result?.text || isProcessing) return;
+  const processQRResult = (text: string) => {
+    if (isProcessing) return;
 
-    console.log("QR Code détecté:", result.text);
+    console.log("QR Code détecté:", text);
 
     try {
       let oeuvreId = "";
 
       // Méthode robuste pour extraire l'ID depuis l'URL
-      if (result.text.includes("/oeuvres/")) {
+      if (text.includes("/oeuvres/")) {
         // Extraction depuis une URL complète
-        const match = result.text.match(/\/oeuvres\/([^/?]+)/);
+        const match = text.match(/\/oeuvres\/([^/?]+)/);
         if (match && match[1]) {
           oeuvreId = match[1];
         }
       } else {
         // Si c'est juste l'ID directement
-        oeuvreId = result.text.trim();
+        oeuvreId = text.trim();
       }
 
       // Nettoyer l'ID (supprimer les slashes en début/fin)
@@ -47,63 +50,76 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
         setIsProcessing(true);
         setFlash(true);
 
+        // Arrêter temporairement le scanner pendant le traitement
+        if (controlsRef.current) {
+          controlsRef.current.stop();
+        }
+
         setTimeout(() => {
           onScanSuccess(oeuvreId);
           setIsProcessing(false);
           setTimeout(() => setFlash(false), 500);
         }, 1200);
       } else {
-        console.warn("Aucun ID d'œuvre valide trouvé:", result.text);
+        console.warn("Aucun ID d'œuvre valide trouvé:", text);
       }
     } catch (error) {
       console.error("Erreur lors du traitement du QR code:", error);
     }
   };
 
-  const handleError = (err: any) => {
-    console.error("Erreur scanner :", err);
-    if (err.name === "NotAllowedError") {
-      setPermission("denied");
+  const handleManualSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (manualCode.trim()) {
+      processQRResult(manualCode.trim());
     }
   };
 
-  const requestPermission = async () => {
+  const startScanner = async () => {
     try {
-      // Configuration optimisée pour la caméra arrière avec meilleur zoom
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: "environment",
-          // Paramètres optimisés pour un meilleur zoom
-          width: { ideal: 1920, max: 1920 },
-          height: { ideal: 1080, max: 1080 },
-          aspectRatio: { ideal: 1.777777778 } // 16:9 pour un meilleur cadrage
-        },
-      });
-      setPermission("granted");
+      if (!videoRef.current) return;
+
+      const codeReader = new BrowserQRCodeReader();
       
-      // Appliquer un zoom via CSS si possible
-      const videoTracks = stream.getVideoTracks();
-      if (videoTracks.length > 0) {
-        const track = videoTracks[0];
-        const capabilities = track.getCapabilities();
-        
-        // Essayer d'appliquer un zoom si supporté
-        if (capabilities.zoom) {
-          const settings = track.getSettings();
-          if (settings.zoom !== undefined) {
-            // Ajuster le zoom pour un cadrage plus large
-            await track.applyConstraints({
-              advanced: [{ zoom: Math.min(capabilities.zoom.max || 1, 1.2) }]
-            });
+      // Obtenir la liste des caméras et sélectionner la caméra arrière
+      const videoInputDevices = await codeReader.listVideoInputDevices();
+      
+      let selectedDeviceId: string | undefined;
+      
+      // Préférer la caméra arrière
+      const rearCamera = videoInputDevices.find(device => 
+        device.label.toLowerCase().includes('back') || 
+        device.label.toLowerCase().includes('arrière') ||
+        device.label.toLowerCase().includes('rear')
+      );
+      
+      selectedDeviceId = rearCamera?.deviceId || videoInputDevices[0]?.deviceId;
+
+      if (!selectedDeviceId) {
+        setPermission("denied");
+        return;
+      }
+
+      setPermission("granted");
+
+      // Démarrer le scanner
+      controlsRef.current = await codeReader.decodeFromVideoDevice(
+        selectedDeviceId,
+        videoRef.current,
+        (result, error) => {
+          if (result) {
+            processQRResult(result.getText());
+          }
+          
+          if (error && !error.message.includes("NotFoundException")) {
+            console.error("Erreur scanner ZXing:", error);
           }
         }
-      }
+      );
+
     } catch (err: any) {
-      console.error("Erreur permission caméra:", err);
-      if (
-        err.name === "NotAllowedError" ||
-        err.name === "PermissionDeniedError"
-      ) {
+      console.error("Erreur initialisation scanner:", err);
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
         setPermission("denied");
       } else {
         setPermission("denied");
@@ -111,16 +127,36 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     }
   };
 
-  // Charger directement avec la caméra arrière
-  useEffect(() => {
-    requestPermission();
-  }, []);
+  const requestPermission = async () => {
+    try {
+      // Test simple de permission caméra
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: "environment" } 
+      });
+      
+      // Arrêter le stream de test
+      stream.getTracks().forEach(track => track.stop());
+      
+      // Démarrer le vrai scanner
+      await startScanner();
+    } catch (err: any) {
+      console.error("Erreur permission caméra:", err);
+      setPermission("denied");
+    }
+  };
 
+  // Nettoyer le scanner lors du démontage
   useEffect(() => {
     return () => {
-      setIsProcessing(false);
-      setFlash(false);
+      if (controlsRef.current) {
+        controlsRef.current.stop();
+      }
     };
+  }, []);
+
+  // Démarrer le scanner au montage
+  useEffect(() => {
+    requestPermission();
   }, []);
 
   return (
@@ -150,10 +186,10 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
               </div>
               <div>
                 <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-[#D4AF37]">
-                  Scanner d'Œuvre
+                  {manualEntry ? "Saisie Manuelle" : "Scanner d'Œuvre"}
                 </h2>
                 <p className="text-[#C6B897] text-xs sm:text-sm">
-                  Caméra arrière active
+                  {manualEntry ? "Entrez le code manuellement" : "Caméra arrière active"}
                 </p>
               </div>
             </div>
@@ -170,67 +206,101 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
             </div>
           </div>
 
-          {/* Zone de scan - Responsive */}
+          {/* Zone de scan ou saisie manuelle */}
           <div className="relative w-full mx-auto border-2 border-[#D4AF37]/60 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg shadow-[#D4AF37]/20 bg-black">
-            <div className="aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto">
-              {permission === "granted" && (
-                <QrScanner
-                  ref={scannerRef}
-                  delay={100}
-                  onError={handleError}
-                  onScan={handleScan}
-                  constraints={{
-                    video: { 
-                      facingMode: "environment",
-                      width: { ideal: 1280 },
-                      height: { ideal: 720 }
-                    },
-                  }}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    transform: "scale(1.1)" // Légèrement zoomé pour mieux voir
-                  }}
-                />
-              )}
-              {permission === "unknown" && (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mx-auto mb-2"></div>
-                    <p className="text-[#C6B897] text-sm">Demande d'accès caméra...</p>
+            {manualEntry ? (
+              // Formulaire de saisie manuelle
+              <div className="p-6 sm:p-8">
+                <form onSubmit={handleManualSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-[#C6B897] text-sm mb-2">
+                      Code de l'œuvre
+                    </label>
+                    <input
+                      type="text"
+                      value={manualCode}
+                      onChange={(e) => setManualCode(e.target.value)}
+                      className="w-full px-4 py-3 bg-[#0A0603] border border-[#D4AF37]/40 rounded-lg text-white placeholder-[#C6B897]/60 focus:outline-none focus:border-[#D4AF37] focus:ring-1 focus:ring-[#D4AF37] transition-colors"
+                      placeholder="Ex: QR-001 ou https://..."
+                      autoFocus
+                    />
                   </div>
-                </div>
-              )}
-              {permission === "denied" && (
-                <div className="flex items-center justify-center h-full p-4">
-                  <div className="text-center">
-                    <p className="text-red-500 mb-3 text-sm sm:text-base">Accès caméra refusé</p>
+                  <div className="flex gap-3">
                     <button
-                      onClick={requestPermission}
-                      className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#E6C158] transition-colors text-sm sm:text-base"
+                      type="submit"
+                      className="flex-1 bg-gradient-to-br from-[#D4AF37] to-[#E6C158] text-black py-3 rounded-lg font-semibold hover:from-[#E6C158] hover:to-[#F4D03F] transition-all duration-300 shadow-lg"
                     >
-                      Réautoriser l'accès
+                      Valider
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setManualEntry(false)}
+                      className="flex-1 bg-[#1a120b] border border-[#D4AF37]/40 text-[#D4AF37] py-3 rounded-lg font-semibold hover:bg-[#D4AF37]/10 transition-all duration-300"
+                    >
+                      Retour
                     </button>
                   </div>
+                </form>
+              </div>
+            ) : (
+              // Scanner caméra
+              <div className="aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative">
+                {permission === "granted" && (
+                  <video
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
+                    style={{ transform: "scale(1.05)" }} // Légère correction de zoom
+                  />
+                )}
+                {permission === "unknown" && (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D4AF37] mx-auto mb-2"></div>
+                      <p className="text-[#C6B897] text-sm">Initialisation caméra...</p>
+                    </div>
+                  </div>
+                )}
+                {permission === "denied" && (
+                  <div className="flex items-center justify-center h-full p-4">
+                    <div className="text-center">
+                      <p className="text-red-400 mb-3 text-sm sm:text-base">
+                        Accès caméra refusé
+                      </p>
+                      <button
+                        onClick={requestPermission}
+                        className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#E6C158] transition-colors text-sm sm:text-base"
+                      >
+                        Réautoriser l'accès
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Cadre de guidage */}
+                <div className="absolute inset-0 pointer-events-none border-8 border-transparent">
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 border-2 border-[#D4AF37] rounded-lg shadow-lg"></div>
                 </div>
-              )}
-            </div>
-            
-            {/* Cadre de guidage */}
-            <div className="absolute inset-0 pointer-events-none border-8 border-transparent">
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 border-2 border-[#D4AF37] rounded-lg shadow-lg"></div>
-            </div>
+              </div>
+            )}
           </div>
 
           {/* Instructions */}
           <div className="mt-4 sm:mt-6 text-center">
             <p className="text-[#C6B897] text-xs sm:text-sm">
-              Positionnez le QR code dans le cadre
+              {manualEntry 
+                ? "Entrez le code QR ou l'URL de l'œuvre" 
+                : "Positionnez le QR code dans le cadre"}
             </p>
-            <p className="text-[#D4AF37]/70 text-xs mt-1">
-              La caméra s'ajuste automatiquement
-            </p>
+            
+            {!manualEntry && (
+              <button
+                onClick={() => setManualEntry(true)}
+                className="mt-2 text-[#D4AF37] hover:text-[#E6C158] transition-colors flex items-center justify-center gap-2 mx-auto text-xs"
+              >
+                <Keyboard className="w-4 h-4" />
+                Saisie manuelle
+              </button>
+            )}
           </div>
 
           {/* Overlay de succès */}
