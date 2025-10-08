@@ -21,10 +21,10 @@ import { SimpleViewer3D } from "@/components/Viewer3D";
 const OEUVRE_DATA = {
   "origines-africaines": {
     id: "origines-africaines",
-    title: "Les Origines Africaines",
+    title: "L'armure du Chasseur Dogon",
     img: "/images/niveau1/galerie-homme-noir.jpg",
     description:
-      "Berceau de l'humanité et diversité génétique des populations noires. L'Afrique est le continent où sont apparus les premiers humains il y a environ 300 000 ans. Les découvertes archéologiques et génétiques confirment que toutes les populations humaines modernes descendent d'ancêtres africains.",
+      "L'armure du chasseur dogon est une tenue traditionnelle portée lors des rituels, notamment des cérémonies du Dama, et non une protection physique, mais un vêtement destiné à se protéger des esprits maléfiques et à protéger le chasseur pendant la chasse. Fabriquée en tissu et ornée de cauris, elle est un élément clé des masques qui incarnent des divinités ou des esprits et qui sont portés lors de danses et de processions rituelles. Fonction et Symbolisme Protection spirituelle : Son rôle principal est de protéger le chasseur des influences néfastes et des esprits maléfiques, lui permettant de chasser sans crainte. Rôle dans les rituels : L'armure du chasseur fait partie des divers masques utilisés dans la société religieuse des Awa (ou Avva), responsable des cérémonies comme le Dama. Le masque du chasseur, une fois enfilé, incarne cet esprit ou cette divinité. ",
     category: "Anthropologie",
     date: "Préhistoire - Antiquité",
     localisation: "Afrique subsaharienne",
