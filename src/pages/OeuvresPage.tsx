@@ -21,6 +21,7 @@ import {
   Globe,
   Users,
   GalleryVertical,
+  X,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -257,7 +258,7 @@ function FloatingDoor({
           <motion.button
             onClick={() => onSelect(door)}
             whileHover={{ scale: 1.1, y: -10 }}
-            className="bg-black/50 backdrop-blur-md border border-[#D4AF37]/30 rounded-2xl text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#D4AF37]/20 hover:border-[#D4AF37]/60 group w-[240px] overflow-hidden"
+            className="bg-black/50 backdrop-blur-md border border-[#D4AF37]/30 rounded-2xl text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#D4AF37]/20 hover:border-[#D4AF37]/60 group w-52 sm:w-[240px] overflow-hidden"
           >
             <div className="p-5 text-center">
               <div className="text-5xl bg-black/40 p-4 rounded-full inline-block text-[#D4AF37] group-hover:scale-110 transition-transform duration-300">
@@ -305,13 +306,13 @@ function FloatingArtwork({
           <motion.div
             onClick={() => onSelect(art)}
             whileHover={{ scale: 1.08, y: -6 }}
-            className="w-80 bg-gradient-to-br from-black/90 to-[#1a120b] border-2 border-[#D4AF37]/50 rounded-2xl overflow-hidden cursor-pointer shadow-2xl backdrop-blur-lg"
+            className="w-64 sm:w-72 lg:w-80 bg-gradient-to-br from-black/90 to-[#1a120b] border-2 border-[#D4AF37]/50 rounded-2xl overflow-hidden cursor-pointer shadow-2xl backdrop-blur-lg"
           >
             <SafeImage
               src={art.img}
               alt={art.title}
               fallbackEmoji="🖼️"
-              className="w-full h-44 object-cover"
+              className="w-full h-36 sm:h-44 object-cover"
             />
             <div className="p-4">
               <div className="flex justify-between items-start mb-2">
@@ -455,8 +456,104 @@ function Scene({
   );
 }
 
+const useIsMobile = (breakpoint = 768) => {
+  const [isMobile, setIsMobile] = useState(window.innerWidth < breakpoint);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < breakpoint);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [breakpoint]);
+
+  return isMobile;
+};
+
+function OeuvresPage2D() {
+  const [currentRoom, setCurrentRoom] = useState("entrance");
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const room = ROOM_CONFIG[currentRoom];
+
+  const handleSelectArtwork = (artwork: any) => {
+    if (artwork.id) {
+      navigate(`/oeuvres/${artwork.id}`);
+    }
+  };
+
+  return (
+    <div className="h-screen w-full bg-[#0A0603] text-white overflow-y-auto p-4 sm:p-6">
+      <div className="absolute top-6 left-6">
+        <Link to="/" className="inline-flex items-center gap-2 text-[#D4AF37] hover:text-white transition-colors duration-300 p-2 rounded-lg hover:bg-[#D4AF37]/10">
+          <ArrowLeft className="w-5 h-5" />
+          <span>{t("oeuvres.back") || "Retour"}</span>
+        </Link>
+      </div>
+
+      <div className="text-center my-16">
+        <h1 className="text-4xl font-bold text-[#D4AF37]">{t("oeuvres.title") || "Musée des Civilisations Noires"}</h1>
+        <p className="mt-2 text-[#C6B897] max-w-2xl mx-auto">{t("oeuvres.subtitle") || "Parcourez l'histoire et l'héritage des civilisations noires"}</p>
+      </div>
+
+      {currentRoom !== "entrance" && (
+        <div className="mb-6">
+          <button
+            onClick={() => setCurrentRoom("entrance")}
+            className="inline-flex items-center gap-2 text-[#D4AF37] hover:text-white transition-colors duration-300 p-2 rounded-lg hover:bg-[#D4AF37]/10 backdrop-blur-sm border border-[#D4AF37]/20"
+          >
+            <Home className="w-5 h-5" />
+            <span>Hall Principal</span>
+          </button>
+        </div>
+      )}
+
+      <div className="max-w-4xl mx-auto">
+        <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">{room.name}</h2>
+        <p className="text-[#C6B897] mb-8">{room.description}</p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {currentRoom === "entrance" ? (
+            room.doors?.map((door) => (
+              <div key={door.target} onClick={() => setCurrentRoom(door.target)} className="bg-black/50 backdrop-blur-md border border-[#D4AF37]/30 rounded-2xl text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#D4AF37]/20 hover:border-[#D4AF37]/60 p-6 cursor-pointer">
+                <div className="flex items-center gap-4">
+                  <div className="text-4xl bg-black/40 p-3 rounded-full inline-block text-[#D4AF37]">
+                    {door.icon}
+                  </div>
+                  <div>
+                    <h3 className="text-[#D4AF37] font-bold text-xl">{door.label}</h3>
+                    <p className="text-[#C6B897] text-sm">{door.description}</p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            room.artworks?.map((art) => (
+              <div key={art.id} onClick={() => handleSelectArtwork(art)} className="bg-gradient-to-br from-black/90 to-[#1a120b] border-2 border-[#D4AF37]/50 rounded-2xl overflow-hidden cursor-pointer shadow-2xl">
+                <SafeImage src={art.img} alt={art.title} fallbackEmoji="🖼️" className="w-full h-48 object-cover" />
+                <div className="p-4">
+                  <h3 className="text-[#D4AF37] font-bold text-lg">{art.title}</h3>
+                  <p className="text-[#C6B897] text-sm mt-1 line-clamp-2">{art.description}</p>
+                  <span className="text-xs text-[#C6B897] bg-[#D4AF37]/10 rounded-full px-2 py-1 mt-2 inline-block">{art.category}</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ------------------ Main Page CORRIGÉE ------------------
 export function OeuvresPage() {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return <OeuvresPage2D />;
+  }
+
   const [currentRoom, setCurrentRoom] = useState("entrance");
   
   const [showMap, setShowMap] = useState(false);
@@ -574,7 +671,7 @@ export function OeuvresPage() {
 
           <button
             onClick={toggleSound}
-            className={`transition-colors duration-300 p-2 rounded-lg backdrop-blur-sm border ${
+            className={`transition-colors duration-300 p-2 rounded-lg backdrop-blur-sm border ${ 
               playing 
                 ? "text-green-400 hover:text-green-300 border-green-400/30 hover:bg-green-400/10" 
                 : "text-[#D4AF37] hover:text-white border-[#D4AF37]/20 hover:bg-[#D4AF37]/10"
@@ -599,9 +696,9 @@ export function OeuvresPage() {
 
         {/* Description du niveau */}
         {currentRoom !== "entrance" && (
-          <div className="absolute z-40 left-1/2 top-20 -translate-x-1/2 text-center">
+          <div className="absolute z-40 left-1/2 top-24 sm:top-20 -translate-x-1/2 text-center px-4 w-full">
             <motion.p
-              className="text-[#C6B897] text-sm max-w-2xl bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-[#D4AF37]/20"
+              className="text-[#C6B897] text-xs sm:text-sm max-w-2xl bg-black/40 backdrop-blur-sm rounded-full px-4 py-2 border border-[#D4AF37]/20 inline-block"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
@@ -611,9 +708,9 @@ export function OeuvresPage() {
         )}
 
         {/* Titre central */}
-        <div className="absolute z-40 left-1/2 top-24 -translate-x-1/2 text-center pointer-events-none px-4 w-full max-w-6xl">
+        <div className="absolute z-40 left-1/2 top-36 sm:top-24 -translate-x-1/2 text-center pointer-events-none px-4 w-full max-w-6xl">
           <motion.h1
-            className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#D4AF37] drop-shadow-[0_0_25px_rgba(212,175,55,0.6)]"
+            className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#D4AF37] drop-shadow-[0_0_25px_rgba(212,175,55,0.6)]"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
           >
@@ -630,22 +727,30 @@ export function OeuvresPage() {
         </div>
 
         {/* Mini carte - Z-INDEX ÉLEVÉ */}
+        <AnimatePresence>
         {showMap && (
           <motion.div
-            className="absolute top-24 right-6 bg-black/80 backdrop-blur-md border border-[#D4AF37]/30 rounded-xl p-6 max-w-sm w-[330px] z-40"
+            key="map-modal"
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl p-4 flex flex-col sm:absolute sm:inset-auto sm:top-24 sm:right-6 sm:w-[330px] sm:max-w-sm sm:bg-black/80 sm:rounded-xl sm:p-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
           >
-            <h3 className="text-[#D4AF37] font-bold text-lg mb-4 flex items-center gap-2">
-              <MapIcon className="w-5 h-5" /> Plan du Musée
-            </h3>
-
-            <div className="space-y-3">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-[#D4AF37] font-bold text-lg flex items-center gap-2">
+                <MapIcon className="w-5 h-5" /> Plan du Musée
+              </h3>
+              <button onClick={() => setShowMap(false)} className="sm:hidden text-[#D4AF37] hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-3 overflow-y-auto">
               {Object.entries(ROOM_CONFIG).map(([key, room]) => (
                 <button
                   key={key}
                   onClick={() => setCurrentRoom(key)}
-                  className={`w-full text-left p-3 rounded-lg transition-all duration-300 border ${
+                  className={`w-full text-left p-3 rounded-lg transition-all duration-300 border ${ 
                     currentRoom === key
                       ? "bg-[#D4AF37]/20 border-[#D4AF37] transform scale-105"
                       : "bg-[#D4AF37]/10 border-[#D4AF37]/20 hover:bg-[#D4AF37]/20"
@@ -653,7 +758,7 @@ export function OeuvresPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`p-2 rounded-lg ${
+                      className={`p-2 rounded-lg ${ 
                         currentRoom === key
                           ? "bg-[#D4AF37] text-black"
                           : "bg-[#D4AF37]/20 text-[#D4AF37]"
@@ -696,6 +801,7 @@ export function OeuvresPage() {
             </div>
           </motion.div>
         )}
+        </AnimatePresence>
       </div>
 
       
