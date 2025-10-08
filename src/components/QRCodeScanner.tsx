@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { BrowserQRCodeReader, IScannerControls } from "@zxing/library";
+import { BrowserMultiFormatReader, BarcodeFormat, DecodeHintType } from "@zxing/library";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, QrCode, Sparkles } from "lucide-react";
 
@@ -18,7 +18,6 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
   const [flash, setFlash] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const controlsRef = useRef<IScannerControls | null>(null);
 
   const processQRResult = (text: string) => {
     if (isProcessing) return;
@@ -28,30 +27,21 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     try {
       let oeuvreId = "";
 
-      // Méthode robuste pour extraire l'ID depuis l'URL
       if (text.includes("/oeuvres/")) {
-        // Extraction depuis une URL complète
         const match = text.match(/\/oeuvres\/([^/?]+)/);
         if (match && match[1]) {
           oeuvreId = match[1];
         }
       } else {
-        // Si c'est juste l'ID directement
         oeuvreId = text.trim();
       }
 
-      // Nettoyer l'ID (supprimer les slashes en début/fin)
       oeuvreId = oeuvreId.replace(/^\/+|\/+$/g, "");
 
       if (oeuvreId) {
         console.log("ID d'œuvre extrait:", oeuvreId);
         setIsProcessing(true);
         setFlash(true);
-
-        // Arrêter temporairement le scanner pendant le traitement
-        if (controlsRef.current) {
-          controlsRef.current.stop();
-        }
 
         setTimeout(() => {
           onScanSuccess(oeuvreId);
@@ -66,88 +56,38 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
     }
   };
 
-  const startScanner = async () => {
-    try {
-      if (!videoRef.current) return;
-
-      const codeReader = new BrowserQRCodeReader();
-      
-      // Obtenir la liste des caméras et sélectionner la caméra arrière
-      const videoInputDevices = await codeReader.listVideoInputDevices();
-      
-      let selectedDeviceId: string | undefined;
-      
-      // Préférer la caméra arrière
-      const rearCamera = videoInputDevices.find(device => 
-        device.label.toLowerCase().includes('back') || 
-        device.label.toLowerCase().includes('arrière') ||
-        device.label.toLowerCase().includes('rear')
-      );
-      
-      selectedDeviceId = rearCamera?.deviceId || videoInputDevices[0]?.deviceId;
-
-      if (!selectedDeviceId) {
-        setPermission("denied");
-        return;
-      }
-
-      setPermission("granted");
-
-      // Démarrer le scanner
-      controlsRef.current = await codeReader.decodeFromVideoDevice(
-        selectedDeviceId,
-        videoRef.current,
-        (result, error) => {
-          if (result) {
-            processQRResult(result.getText());
-          }
-          
-          if (error && !error.message.includes("NotFoundException")) {
-            console.error("Erreur scanner ZXing:", error);
-          }
-        }
-      );
-
-    } catch (err: any) {
-      console.error("Erreur initialisation scanner:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        setPermission("denied");
-      } else {
-        setPermission("denied");
-      }
-    }
-  };
-
-  const requestPermission = async () => {
-    try {
-      // Test simple de permission caméra
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: "environment" } 
-      });
-      
-      // Arrêter le stream de test
-      stream.getTracks().forEach(track => track.stop());
-      
-      // Démarrer le vrai scanner
-      await startScanner();
-    } catch (err: any) {
-      console.error("Erreur permission caméra:", err);
-      setPermission("denied");
-    }
-  };
-
-  // Nettoyer le scanner lors du démontage
   useEffect(() => {
-    return () => {
-      if (controlsRef.current) {
-        controlsRef.current.stop();
+    const codeReader = new BrowserMultiFormatReader();
+    const hints = new Map();
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]);
+
+    const startScanning = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+        setPermission("granted");
+
+        if (videoRef.current) {
+          codeReader.decodeFromVideoDevice(undefined, videoRef.current, (result, err) => {
+            if (result) {
+              processQRResult(result.getText());
+              codeReader.reset();
+            }
+            if (err && !(err.constructor.name === 'NotFoundException')) {
+              console.error(err);
+            }
+          });
+        }
+      } catch (err) {
+        setPermission("denied");
+        console.error(err);
       }
     };
-  }, []);
 
-  // Démarrer le scanner au montage
-  useEffect(() => {
-    requestPermission();
+    startScanning();
+
+    return () => {
+      codeReader.reset();
+    };
   }, []);
 
   return (
@@ -165,11 +105,9 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
           exit={{ scale: 0.8, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25 }}
         >
-          {/* Effets d'arrière-plan */}
           <div className="absolute top-0 left-0 w-32 h-32 bg-[#D4AF37]/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-[#D4AF37]/5 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
 
-          {/* En-tête */}
           <div className="relative z-10 flex items-center justify-between mb-4 sm:mb-6 md:mb-8">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="p-2 sm:p-3 bg-gradient-to-br from-[#D4AF37] to-[#E6C158] rounded-xl sm:rounded-2xl shadow-lg">
@@ -197,14 +135,13 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
             </div>
           </div>
 
-          {/* Zone de scan */}
           <div className="relative w-full mx-auto border-2 border-[#D4AF37]/60 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg shadow-[#D4AF37]/20 bg-black">
             <div className="aspect-square w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto relative">
               {permission === "granted" && (
                 <video
                   ref={videoRef}
                   className="w-full h-full object-cover"
-                  style={{ transform: "scale(1.05)" }} // Légère correction de zoom
+                  style={{ transform: "scale(1.05)" }}
                 />
               )}
               {permission === "unknown" && (
@@ -222,7 +159,7 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                       Accès caméra refusé
                     </p>
                     <button
-                      onClick={requestPermission}
+                      onClick={() => window.location.reload()} // Simple reload to re-trigger permission prompt
                       className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[#D4AF37] text-black rounded-lg hover:bg-[#E6C158] transition-colors text-sm sm:text-base"
                     >
                       Réautoriser l'accès
@@ -231,24 +168,18 @@ const QRCodeScanner: React.FC<QRCodeScannerProps> = ({
                 </div>
               )}
               
-              {/* Cadre de guidage */}
               <div className="absolute inset-0 pointer-events-none border-8 border-transparent">
                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-56 sm:h-56 md:w-64 md:h-64 border-2 border-[#D4AF37] rounded-lg shadow-lg"></div>
               </div>
             </div>
           </div>
 
-          {/* Instructions */}
           <div className="mt-4 sm:mt-6 text-center">
             <p className="text-[#C6B897] text-xs sm:text-sm">
               Positionnez le QR code dans le cadre
             </p>
-            <p className="text-[#D4AF37]/70 text-xs mt-1">
-              La détection est automatique
-            </p>
           </div>
 
-          {/* Overlay de succès */}
           <AnimatePresence>
             {flash && (
               <motion.div
