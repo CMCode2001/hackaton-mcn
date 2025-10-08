@@ -1,7 +1,7 @@
 // OeuvreDetailPage.jsx
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft,
   Play,
@@ -12,6 +12,7 @@ import {
   Download,
   Share2,
   Heart,
+  X,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { SimpleViewer3D } from "@/components/Viewer3D";
@@ -87,6 +88,7 @@ export default function OeuvreDetailPage() {
   const [duration, setDuration] = useState(0);
   const [activeTab, setActiveTab] = useState("audio");
   const [isLiked, setIsLiked] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
 
   const audioRef = useRef(null);
   const videoRef = useRef(null);
@@ -156,7 +158,9 @@ export default function OeuvreDetailPage() {
               className="flex items-center gap-3 text-[#D4AF37] hover:text-white transition-colors group"
             >
               <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
-              <span className="font-semibold">Retour au Musée</span>
+              <span className="font-semibold hidden sm:inline">
+                Retour au Musée
+              </span>
             </button>
 
             <div className="flex items-center gap-4">
@@ -176,10 +180,6 @@ export default function OeuvreDetailPage() {
 
               <button className="p-2 bg-[#D4AF37]/10 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition-colors">
                 <Share2 className="w-5 h-5" />
-              </button>
-
-              <button className="p-2 bg-[#D4AF37]/10 text-[#D4AF37] rounded-lg hover:bg-[#D4AF37]/20 transition-colors">
-                <Download className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -207,7 +207,10 @@ export default function OeuvreDetailPage() {
                 }}
               />
 
-              <button className="absolute top-4 right-4 p-2 bg-black/60 rounded-lg text-white hover:bg-black/80 transition-colors">
+              <button
+                onClick={() => setIsZoomed(true)}
+                className="absolute top-4 right-4 p-2 bg-black/60 rounded-lg text-white hover:bg-black/80 transition-colors"
+              >
                 <Maximize className="w-5 h-5" />
               </button>
             </motion.div>
@@ -217,47 +220,30 @@ export default function OeuvreDetailPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-black/40 backdrop-blur-lg rounded-2xl p-6 border border-[#D4AF37]/20"
+              className="bg-black/40 backdrop-blur-lg rounded-2xl p-4 sm:p-6 border border-[#D4AF37]/20 w-full max-w-full overflow-hidden"
             >
-              <h3 className="text-[#D4AF37] font-bold text-xl mb-4">
+              <h3 className="text-[#D4AF37] font-bold text-lg sm:text-xl mb-3 sm:mb-4 text-center sm:text-left">
                 Informations détaillées
               </h3>
 
-              <div className="space-y-3">
-                <div className="flex justify-between py-2 border-b border-[#D4AF37]/10">
-                  <span className="text-[#C6B897]">Catégorie</span>
-                  <span className="text-white font-medium">
-                    {oeuvre.category}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-2 border-b border-[#D4AF37]/10">
-                  <span className="text-[#C6B897]">Période</span>
-                  <span className="text-white font-medium">
-                    {oeuvre.details.periode}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-2 border-b border-[#D4AF37]/10">
-                  <span className="text-[#C6B897]">Localisation</span>
-                  <span className="text-white font-medium">
-                    {oeuvre.localisation}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-2 border-b border-[#D4AF37]/10">
-                  <span className="text-[#C6B897]">Matériaux</span>
-                  <span className="text-white font-medium">
-                    {oeuvre.details.materiaux}
-                  </span>
-                </div>
-
-                <div className="flex justify-between py-2">
-                  <span className="text-[#C6B897]">Collection</span>
-                  <span className="text-white font-medium">
-                    {oeuvre.details.collection}
-                  </span>
-                </div>
+              <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
+                {[
+                  { label: "Catégorie", value: oeuvre.category },
+                  { label: "Période", value: oeuvre.details.periode },
+                  { label: "Localisation", value: oeuvre.localisation },
+                  { label: "Matériaux", value: oeuvre.details.materiaux },
+                  { label: "Collection", value: oeuvre.details.collection },
+                ].map((info, index) => (
+                  <div
+                    key={index}
+                    className="flex flex-col sm:flex-row sm:justify-between py-2 border-b last:border-0 border-[#D4AF37]/10"
+                  >
+                    <span className="text-[#C6B897]">{info.label}</span>
+                    <span className="text-white font-medium break-words text-right sm:text-left">
+                      {info.value}
+                    </span>
+                  </div>
+                ))}
               </div>
             </motion.div>
           </div>
@@ -277,11 +263,11 @@ export default function OeuvreDetailPage() {
                 <span className="text-[#C6B897] text-sm">{oeuvre.date}</span>
               </div>
 
-              <h1 className="text-4xl lg:text-5xl font-bold text-[#D4AF37] leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-[#D4AF37] leading-tight">
                 {oeuvre.title}
               </h1>
 
-              <p className="text-[#C6B897] text-lg leading-relaxed">
+              <p className="text-base lg:text-lg text-[#C6B897] leading-relaxed">
                 {oeuvre.description}
               </p>
             </motion.div>
@@ -297,8 +283,8 @@ export default function OeuvreDetailPage() {
               <div className="flex border-b border-[#D4AF37]/20">
                 {[
                   { id: "audio", label: "Audio", icon: "▶︎ •၊၊||၊|။|။" },
-                  { id: "video", label: "Documentaire Vidéo", icon: "🎥" },
-                  { id: "3d", label: "Version 3D", icon: "🧊" },
+                  { id: "video", label: "", icon: "🎥 Vidéo" },
+                  { id: "3d", label: "Version ", icon: "🧊 3D" },
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -433,49 +419,79 @@ export default function OeuvreDetailPage() {
                         Votre navigateur ne supporte pas l'élément vidéo.
                       </video>
                     </div>
-
-                    
                   </div>
                 )}
 
                 {/* Tab 3D */}
-                {activeTab === '3d' && (
-                    <div className="space-y-6">
-                      <div className="text-center">
-                        <h3 className="text-[#D4AF37] font-bold text-lg mb-2">
-                          Exploration 3D Interactive
-                        </h3>
-                        <p className="text-[#C6B897] text-sm">
-                          Tournez, zoomez et explorez cette œuvre sous tous les angles
-                        </p>
-                      </div>
+                {activeTab === "3d" && (
+                  <div className="space-y-6">
+                    <div className="text-center">
+                      <h3 className="text-[#D4AF37] font-bold text-lg mb-2">
+                        Exploration 3D Interactive
+                      </h3>
+                      <p className="text-[#C6B897] text-sm">
+                        Tournez, zoomez et explorez cette œuvre sous tous les
+                        angles
+                      </p>
+                    </div>
 
-                      {/* Utilisez Viewer3D ou SimpleViewer3D selon ce qui fonctionne */}
-                      <SimpleViewer3D 
-                        modelUrl={oeuvre.model3D}
-                        className="h-96 w-full"
-                      />
+                    {/* Utilisez Viewer3D ou SimpleViewer3D selon ce qui fonctionne */}
+                    <SimpleViewer3D
+                      modelUrl={oeuvre.model3D}
+                      className="h-96 w-full"
+                    />
 
-                      {/* Message d'information */}
-                      <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-lg p-4">
-                        <div className="flex items-start gap-3">
-                          <span className="text-[#D4AF37] text-lg">💡</span>
-                          <div>
-                            <h4 className="text-[#D4AF37] font-semibold mb-1">Information 3D</h4>
-                            <p className="text-[#C6B897] text-sm">
-                              Les modèles 3D sont chargés depuis des fichiers GLB optimisés. 
-                              Si un modèle n'est pas disponible, un placeholder s'affichera.
-                            </p>
-                          </div>
+                    {/* Message d'information
+                    <div className="bg-[#D4AF37]/10 border border-[#D4AF37]/30 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <span className="text-[#D4AF37] text-lg">💡</span>
+                        <div>
+                          <h4 className="text-[#D4AF37] font-semibold mb-1">
+                            Information 3D
+                          </h4>
+                          <p className="text-[#C6B897] text-sm">
+                            Les modèles 3D sont chargés depuis des fichiers GLB
+                            optimisés. Si un modèle n'est pas disponible, un
+                            placeholder s'affichera.
+                          </p>
                         </div>
                       </div>
-                    </div>
-                  )}
+                    </div> */}
+                  </div>
+                )}
               </div>
             </motion.div>
           </div>
         </div>
       </main>
+
+      {/* Image Zoom Modal */}
+      <AnimatePresence>
+        {isZoomed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsZoomed(false)}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg"
+          >
+            <motion.img
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.8 }}
+              src={oeuvre.img}
+              alt={oeuvre.title}
+              className="max-w-[90vw] max-h-[90vh] object-contain rounded-lg shadow-2xl"
+            />
+            <button
+              onClick={() => setIsZoomed(false)}
+              className="absolute top-6 right-6 p-2 bg-white/20 rounded-full text-white hover:bg-white/30 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

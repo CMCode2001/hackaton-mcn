@@ -32,15 +32,15 @@ export function SimpleViewer3D({ modelUrl, className = "h-96" }) {
 
   return (
     <div
-      className={`relative bg-[#1a120b] rounded-xl border border-[#D4AF37]/30 ${className}`}
+      className={`relative bg-[#1a120b] rounded-xl overflow-hidden border border-[#D4AF37]/30 ${className}`}
     >
       <Canvas
         gl={{ antialias: true }}
         camera={{ position: [5, 5, 5], fov: 50 }}
       >
-        <color attach="background" args={["#1a120b"]} />
+        <color attach="background" args={["#342308"]} />
 
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={0.9} />
         <pointLight position={[10, 10, 10]} />
 
         <Suspense fallback={<ModelPlaceholder />}>
