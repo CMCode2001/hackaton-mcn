@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, LassoSelect, Sparkles } from "lucide-react";
+import { ArrowRight, LassoSelect, QrCode, Sparkle, Sparkles } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import mcnPresentationVideo from "../assets/media/mcn-hero-section.mp4";
 import backgroundAudio from "../assets/media/african_ambience.mp3"; // 🎧 ton ambiance musée
@@ -35,10 +35,6 @@ export function LandingPage() {
   }, []);
 
   const handleStartExperience = () => {
-    if (audioRef.current && !isPlaying) {
-      audioRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    }
 
     // Lancer l'effet de transition
     setIsTransitioning(true);

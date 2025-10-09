@@ -82,7 +82,7 @@ export function Header() {
             <motion.img
               src={LogoMCN}
               alt="Logo MCN"
-              className="w-52 sm:w-60 relative z-10"
+              className="w-40 sm:w-52 md:w-60 relative z-10"
               whileHover={{ scale: 1.05 }}
               transition={{ duration: 0.3 }}
             />

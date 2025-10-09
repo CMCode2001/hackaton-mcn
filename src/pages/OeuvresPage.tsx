@@ -476,6 +476,47 @@ function OeuvresPage2D() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const room = ROOM_CONFIG[currentRoom];
+  const [playing, setPlaying] = useState(true);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const initializeAudio = async () => {
+      try {
+        audioRef.current = new Audio(backgroundAudio);
+        audioRef.current.loop = true;
+        audioRef.current.volume = 0.25;
+        await audioRef.current.play();
+        setPlaying(true);
+      } catch (err) {
+        console.warn("Lecture audio automatique bloquée:", err);
+      }
+    };
+    initializeAudio();
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const toggleSound = async () => {
+    if (!audioRef.current) return;
+    try {
+      if (playing) {
+        audioRef.current.pause();
+        setPlaying(false);
+      } else {
+        if (audioRef.current.currentTime === 0) {
+          audioRef.current.volume = 0.25;
+        }
+        await audioRef.current.play();
+        setPlaying(true);
+      }
+    } catch (err) {
+      console.warn("Erreur de lecture audio:", err);
+    }
+  };
 
   const handleSelectArtwork = (artwork: any) => {
     if (artwork.id) {
@@ -484,62 +525,72 @@ function OeuvresPage2D() {
   };
 
   return (
-    <div className="h-screen w-full bg-[#0A0603] text-white overflow-y-auto p-4 sm:p-6">
-      <div className="absolute top-6 left-6">
-        <Link to="/" className="inline-flex items-center gap-2 text-[#D4AF37] hover:text-white transition-colors duration-300 p-2 rounded-lg hover:bg-[#D4AF37]/10">
-          <ArrowLeft className="w-5 h-5" />
-          <span>{t("oeuvres.back") || "Retour"}</span>
-        </Link>
-      </div>
+    <div className="w-full min-h-screen text-white overflow-y-auto p-4 sm:p-6 pt-20 relative bg-[#0A0603]">
+      <div 
+        className="absolute inset-0 bg-cover bg-center opacity-20"
+        style={{ backgroundImage: `url(${hallMusee})` }}
+      ></div>
 
-      <div className="text-center my-16">
-        <h1 className="text-4xl font-bold text-[#D4AF37]">{t("oeuvres.title") || "Musée des Civilisations Noires"}</h1>
-        <p className="mt-2 text-[#C6B897] max-w-2xl mx-auto">{t("oeuvres.subtitle") || "Parcourez l'histoire et l'héritage des civilisations noires"}</p>
-      </div>
-
-      {currentRoom !== "entrance" && (
-        <div className="mb-6">
-          <button
-            onClick={() => setCurrentRoom("entrance")}
-            className="inline-flex items-center gap-2 text-[#D4AF37] hover:text-white transition-colors duration-300 p-2 rounded-lg hover:bg-[#D4AF37]/10 backdrop-blur-sm border border-[#D4AF37]/20"
-          >
-            <Home className="w-5 h-5" />
-            <span>Hall Principal</span>
-          </button>
+      <div className="relative z-10">
+        {/* Control bar for Back and Volume */}
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <Link to="/" className="inline-flex items-center gap-2 text-[#D4AF37] hover:text-white transition-colors duration-300 p-2 rounded-lg hover:bg-[#D4AF37]/10">
+              <ArrowLeft className="w-5 h-5" />
+              <span>{t("oeuvres.back") || "Retour"}</span>
+            </Link>
+          </div>
+          <div>
+            <button
+                onClick={toggleSound}
+                className={`transition-colors duration-300 p-2 rounded-lg backdrop-blur-sm border ${
+                  playing 
+                    ? "text-green-400 hover:text-green-300 border-green-400/30 hover:bg-green-400/10" 
+                    : "text-[#D4AF37] hover:text-white border-[#D4AF37]/20 hover:bg-[#D4AF37]/10"
+                }`}
+              >
+                <Volume2 className="w-5 h-5" />
+            </button>
+          </div>
         </div>
-      )}
 
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">{room.name}</h2>
-        <p className="text-[#C6B897] mb-8">{room.description}</p>
+        <div className="text-center my-8">
+          <h1 className="text-4xl font-bold text-[#D4AF37]">{t("oeuvres.title") || "Musée des Civilisations Noires"}</h1>
+          <p className="mt-2 text-[#C6B897] max-w-2xl mx-auto">{t("oeuvres.subtitle") || "Parcourez l'histoire et l'héritage des civilisations noires"}</p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {currentRoom === "entrance" ? (
-            room.doors?.map((door) => (
-              <div key={door.target} onClick={() => setCurrentRoom(door.target)} className="bg-black/50 backdrop-blur-md border border-[#D4AF37]/30 rounded-2xl text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#D4AF37]/20 hover:border-[#D4AF37]/60 p-6 cursor-pointer">
-                <div className="flex items-center gap-4">
-                  <div className="text-4xl bg-black/40 p-3 rounded-full inline-block text-[#D4AF37]">
-                    {door.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-[#D4AF37] font-bold text-xl">{door.label}</h3>
-                    <p className="text-[#C6B897] text-sm">{door.description}</p>
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-[#D4AF37] mb-2">{room.name}</h2>
+          <p className="text-[#C6B897] mb-8">{room.description}</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {currentRoom === "entrance" ? (
+              room.doors?.map((door) => (
+                <div key={door.target} onClick={() => setCurrentRoom(door.target)} className="bg-black/50 backdrop-blur-md border border-[#D4AF37]/30 rounded-2xl text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#D4AF37]/20 hover:border-[#D4AF37]/60 p-6 cursor-pointer">
+                  <div className="flex items-center gap-4">
+                    <div className="text-4xl bg-black/40 p-3 rounded-full inline-block text-[#D4AF37]">
+                      {door.icon}
+                    </div>
+                    <div>
+                      <h3 className="text-[#D4AF37] font-bold text-xl">{door.label}</h3>
+                      <p className="text-[#C6B897] text-sm">{door.description}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
-          ) : (
-            room.artworks?.map((art) => (
-              <div key={art.id} onClick={() => handleSelectArtwork(art)} className="bg-gradient-to-br from-black/90 to-[#1a120b] border-2 border-[#D4AF37]/50 rounded-2xl overflow-hidden cursor-pointer shadow-2xl">
-                <SafeImage src={art.img} alt={art.title} fallbackEmoji="🖼️" className="w-full h-48 object-cover" />
-                <div className="p-4">
-                  <h3 className="text-[#D4AF37] font-bold text-lg">{art.title}</h3>
-                  <p className="text-[#C6B897] text-sm mt-1 line-clamp-2">{art.description}</p>
-                  <span className="text-xs text-[#C6B897] bg-[#D4AF37]/10 rounded-full px-2 py-1 mt-2 inline-block">{art.category}</span>
+              ))
+            ) : (
+              room.artworks?.map((art) => (
+                <div key={art.id} onClick={() => handleSelectArtwork(art)} className="bg-gradient-to-br from-black/90 to-[#1a120b] border-2 border-[#D4AF37]/50 rounded-2xl overflow-hidden cursor-pointer shadow-2xl">
+                  <SafeImage src={art.img} alt={art.title} fallbackEmoji="🖼️" className="w-full h-48 object-cover" />
+                  <div className="p-4">
+                    <h3 className="text-[#D4AF37] font-bold text-lg">{art.title}</h3>
+                    <p className="text-[#C6B897] text-sm mt-1 line-clamp-2">{art.description}</p>
+                    <span className="text-xs text-[#C6B897] bg-[#D4AF37]/10 rounded-full px-2 py-1 mt-2 inline-block">{art.category}</span>
+                  </div>
                 </div>
-              </div>
-            ))
-          )}
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>
